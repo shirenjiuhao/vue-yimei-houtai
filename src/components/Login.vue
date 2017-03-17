@@ -17,7 +17,6 @@
 
 <script>
   import axios from 'axios'
-
   export default {
     data() {
       return {
@@ -66,12 +65,13 @@
                 }
                 return ret
               }],
-               headers: {
+               /*headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
-              }
+              }*/
             }).then(res => {
               console.log(res);
               this.logining = false;
+              console.log('----------------------------------------------------')
               if (res.data.status != 200) {
                 this.$notify({
                   title: '错误',
@@ -80,11 +80,27 @@
                 });
               } else {
                 this.$router.params = res.data.data;
+                var signIn = {
+                    apiUrl: WebIM.config.apiURL,
+                    user: res.data.data.counselor.uno,
+                    pwd: res.data.data.counselor.easemobPwd,
+                    appKey: WebIM.config.appkey,
+                    success: function (token) {
+                        alert('登陆成功');
+                        console.log(token)
+                         //var token = token.access_token;
+                         //WebIM.utils.setCookie('webim_' + encryptUsername, token, 1);
+                    },
+                    error: function(err){
+                      //console.log(err)
+                    }
+                };
                 sessionStorage.setItem('user', JSON.stringify(loginParams));
                 this.$router.push({ path: '/now' });
+                conn.open(signIn);
               }   
             }).catch((err) =>{
-              console.log(err)
+              //console.log(err)
             })
           } else {
             console.log('error submit!!');

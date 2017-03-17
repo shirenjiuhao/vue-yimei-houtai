@@ -4,6 +4,7 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-default/index.css'
 import VueRouter from 'vue-router'
 import routes from './routes.js'
+import $ from 'jquery'
 
 Vue.use(ElementUI)
 Vue.use(VueRouter)
@@ -13,7 +14,6 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  //NProgress.start();
   if (to.path == '/login') {
     sessionStorage.removeItem('user');
   }

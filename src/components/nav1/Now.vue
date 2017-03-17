@@ -51,14 +51,14 @@
 		 		<el-col :span="14" style='border-right:1px solid #d1dbe5'>
 					<div class='dialog_header'>
 						<span>医美</span>
-						<el-select v-model="status" placeholder="请选择" class='new-select' style='border:none'>
-						    <el-option
+						<select seleted='1' placeholder="请选择" class='new-select'>
+						    <option
 						      v-for="item in options"
 						      :key='item.key'
 						      :label="item.name"
 						      :value="item.key">
-						    </el-option>
-						 </el-select>
+						    </option>
+						 </select>
 						 <span class='dialog_use' v-cloak>转接至：{{sysUserName}}</span>
 					</div>
 				  	<div class='dialog_chat'>
@@ -69,7 +69,7 @@
 		                <div class="window-chat-txt">
 		                    <img src="../../assets/logo.png" alt="正在加载"/>
 		                    <div class="window-chat-txt-left">
-		                        您好我是您的专属咨询师，您好我是您的专属咨询师,
+		                        您好我是您的烦着，您好我是您的专属咨询师,
 		                    </div>
 		                </div>
 		                <div class="window-chat-txt">
@@ -80,12 +80,13 @@
 		                </div>
 		            </div>
 		            <div class='dialog_foot'>
-		            	<el-input
-						  type="textarea"
+		            	<el-input style='width:80%;' v-model='a'
+						  type="textarea" id="info_text"
 						  :autosize="{ minRows: 2, maxRows: 5}"
 						  placeholder="请输入内容"
 						  >
 						</el-input>
+						<el-button @click.native='sendPrivateText'>发送</el-button>
 		            </div>
 				</el-col>
 				<el-col :span="10">
@@ -101,33 +102,31 @@
 					            </div>
 					            <div class="window_right_msg">
 					                <div><i class="window_right_icon"></i>历史记录</div>
-					                <div style="color:#999;margin-top: 50px;margin-bottom: 50px;">暂无数据记录</div>
+					                <el-card class="box-card">
+									  <div v-for="o in lishi">
+									    {{'列表内容 ' + o.firsttime }}
+									  </div>
+									</el-card>
 					            </div>
 							</template>
 						</el-tab-pane>
 					    <el-tab-pane label="制定方案" name="second">
 							<template>
 								<section id='progess'>
-									<div class="window_right_msg1">
-					                <div>名称：润白眼玻尿酸1M</div>
-					                <div>手机号：13634982345</div>
-					                <div>治疗时长：10分钟</div>
-					                <div>技术理念：李敏页面详情</div>
-					                <div>治疗效果：李敏页面详情</div>
-					                <div>项目优势：李敏页面详情</div>
-					                <div>价格：李敏页面详情</div>
-					            </div>
-					            <div class="window_right_msg1">
-					                <div class="window_right_btn">
-					                    <span>+</span>添加方案
-					                </div>
-					            </div>
-					            <div class="window_right_msg1">
-					                <div class="window_right_price">
-					                    <span>总价：￥148.00</span>
-					                    <button>确认方案</button>
-					                </div>
-					            </div>
+									<el-card class="box-card">
+									  <div v-for="o in progess">
+									    {{o}}
+									  </div>
+									</el-card>
+						            <div class="window_right_msg1">
+						                <el-button size="large" icon='plus'>添加方案</el-button>
+						            </div>
+						            <div class="window_right_msg1">
+						                <div class="window_right_price">
+						                    <span>总价：￥148.00</span>
+						                    <el-button size="small">确认方案</el-button>
+						                </div>
+						            </div>
 								</section>
 							</template>
 						</el-tab-pane>
@@ -147,6 +146,8 @@
 
 <script>
 	import axios from 'axios'
+	import $ from 'jquery'
+
 	export default {
 		data() {
 			return {
@@ -155,6 +156,7 @@
 				},
 				sysUserName:'',
 				users: [],
+				a:'',
 				totalPage:0,
 				currentPage: 0,
 				pageSize: 10,
@@ -164,6 +166,16 @@
 				status:1,
 				options:[{name:'有效对话',key:1},{name:'无效对话',key:2}],
 				activeName: 'first',
+				lishi:[{firsttime:'2017-03-17'},{firsttime:'2017-03-17'}],
+				progess:['名称：润白眼玻尿酸1M',
+						'手机号：13634982345',
+						'治疗时长：10分钟',
+						'技术理念：李敏页面详情',
+						'治疗效果：李敏页面详情',
+						'项目优势：李敏页面详情',
+						'价格：李敏页面详情'
+						],
+				chatInfo:[],		
 
 				pickerOptions0: {//时间选择
 		          disabledDate(time) {
@@ -209,6 +221,32 @@
 			}
 		},
 		methods: {
+			//发送消息
+			sendPrivateText(){
+				let messages = this.a;
+				if (messages == '') {
+	                return false
+	            }
+	            this.a = '';
+	            let id = conn.getUniqueId();                 // 生成本地消息id
+	            let msg = new WebIM.message('txt', id);      // 创建文本消息
+	            msg.set({
+	                msg: messages,                  // 消息内容
+	                to: 'knl6vl5d8hglb8yhsx',                          // 接收消息对象（用户id）
+	                roomType: false,
+	                success: function (id, serverMsgId) {
+	                    console.log('send private text Success');
+	                    console.log(msg)
+	                    $('.dialog_chat').append('<div data-v-fcf47748 class="window-chat-txt">' + 
+	    '<div data-v-fcf47748 class="window-chat-txt-right"> '+
+	    msg.value +'</div>'+
+	    '<img data-v-fcf47748 src="/src/assets/logo.png" alt="正在加载"/>'+
+	'</div>')
+	                }
+	            });
+	            msg.body.chatType = 'singleChat';
+	            conn.send(msg.body);
+			},
 			handleClick(tab, event) {
 		        console.log(tab, event);
 		      },
@@ -253,44 +291,7 @@
 					this.listLoading = false;
 				})
 			},
-			//删除
-			/*handleDel: function (index, row) {
-				this.$confirm('确认删除该记录吗?', '提示', {
-					type: 'warning'
-				}).then(() => {
-					this.listLoading = true;
-					NProgress.start();
-					let para = { sid: row.sid };
-					$.ajax({
-						url: '/momingtang/web/backSchool/deleteSchool',
-						type: 'POST',
-						data: para,
-					})
-					.done(function(res) {
-						console.log("success-----单个删除");
-						this.listLoading = false;
-						NProgress.done();
-						console.log(res)
-						if(res.status == 1){
-							this.$notify({
-								title: '成功',
-								message: '删除成功',
-								type: 'success'
-							});
-							this.getUsers();
-						}else{
-							this.$notify({
-								title: '失败',
-								message: '删除失败',
-								type: 'error'
-							});
-							this.getUsers();
-						}
-					}.bind(this));
-				}).catch(() => {
-
-				});
-			},*/
+			
 			//显示编辑界面
 			handleEdit: function (index, row) {
 				this.editFormVisible = true;
@@ -372,36 +373,34 @@
 /* 对话框头部 */
 #now-dialog .dialog_header{font-size:18px;color:#58B7FF;line-height: 41px;border-bottom:1px solid #d1dbe5}
 .dialog_header .dialog_use{float: right;font-size: 14px;margin-right: 20px;}
-#now-dialog .new-select{width:108px;font-size:12px;}
+#now-dialog .new-select{border:none;width:72px;font-size:12px;}
 /* 聊天界面 */
 .dialog_chat{overflow-y:scroll;height:250px;padding:10px;}
 .window-chat-time{text-align: center;}
 .window-chat-txt{
-    position:relative;display:flex;margin-top:1rem;
+    position:relative;display:flex;margin-top:1rem;color:#fff;
 }
 .window-chat-txt img{display:block;width:50px;height:50px;border-radius: 50%;}
-.window-chat-txt div{display: flex;flex:1;justify-content: center;align-items: center;border-radius: 1rem;position: relative;background:#c1c1c1;padding:5px;}
+.window-chat-txt div{display: flex;flex:1;justify-content: center;align-items: center;border-radius: 1rem;position: relative;background:#58B7FF;padding:5px;}
 .window-chat-txt .window-chat-txt-right{margin-right: 20px;}
 .window-chat-txt .window-chat-txt-left{margin-left: 20px;}
 .window-chat-txt-right:after{
-    content:'';position: absolute;top:1.3rem;right:-1.3rem;
-    border-width: 8px;border-style:dashed dashed dashed solid;border-color: transparent transparent transparent #c1c1c1;
+    content:'';position: absolute;top:18px;right:-15px;
+    border-width: 8px;border-style:dashed dashed dashed solid;border-color: transparent transparent transparent #58B7FF;
 }
 .window-chat-txt-left:before{
-    content:'';position: absolute;top:1.3rem;left:-1.3rem;
-    border-width: 8px;border-style:dashed solid dashed dashed;border-color: transparent #c1c1c1 transparent transparent;
+    content:'';position: absolute;top:18px;left:-15px;
+    border-width: 8px;border-style:dashed solid dashed dashed;border-color: transparent #58B7FF transparent transparent;
 }
-.window_right_info{border-left:0.08rem solid #c1c1c1;height: 326px;background: #fff}
+
 .window_right_msg{padding-top: 10px;padding-left:40px;position:relative;line-height:2;height:160px;}
-.window_right_icon{position: absolute;width:15px;height:15px;background-color:red;top:10px;left:20px;}
+.window_right_icon{position: absolute;width:15px;height:15px;background-color:red;top:16px;left:20px;}
+.dialog_foot{border-top: 1px solid #bfcbd9}
 /**/
 .window_right_msg1{padding: 10px;
-    position: relative;
+    position: relative;text-align: center;
     line-height: 2;}
-.window_right_btn{display: flex;justify-content: center;align-items: center;border:1px solid #c1c1c1;
-    cursor: pointer;}
-.window_right_btn span{font-size: 2rem;position: relative;top:-2px;}
 .window_right_price{height: 48px;display: flex;justify-content: space-around;align-items: center}
-.window_right_price button{background-color:lightskyblue;padding:3px;color:#fff;cursor: pointer}
 #progess{height: 340px; overflow-y:scroll;}
+.box-card{border: none}
 </style>
