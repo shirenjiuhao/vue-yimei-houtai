@@ -6,6 +6,7 @@ import VueRouter from 'vue-router'
 import routes from './routes.js'
 import $ from 'jquery'
 
+
 Vue.use(ElementUI)
 Vue.use(VueRouter)
 

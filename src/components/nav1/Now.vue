@@ -47,7 +47,7 @@
 		</el-col>
 		<!--对话界面-->
 		<el-dialog title="聊天窗口" v-model="editFormVisible" :close-on-click-modal="false"  style='padding-bottom:10px;'>
-		 	<section id='now-dialog'>
+		 	<section id='now-dialog' :data='doctorInfo'>
 		 		<el-col :span="14" style='border-right:1px solid #d1dbe5'>
 					<div class='dialog_header'>
 						<span>医美</span>
@@ -59,12 +59,12 @@
 						      :value="item.key">
 						    </option>
 						 </select>
-						 <span class='dialog_use' v-cloak>转接至：{{sysUserName}}</span>
+						 <span class='dialog_use' v-cloak>转接至：{{doctorInfo.doctorName}}</span>
 					</div>
 				  	<div class='dialog_chat'>
 		                <div class="window-chat-time">
-		                    <div>01-09 15:03 用户进入</div>
-		                    <div>由心理美容01接待</div>
+		                    <div>{{doctorInfo.reserveTime}} 用户进入</div>
+		                    <div>{{doctorInfo.doctorName}}</div>
 		                </div>
 		                <div class="window-chat-txt">
 		                    <img src="../../assets/logo.png" alt="正在加载"/>
@@ -147,7 +147,9 @@
 <script>
 	import axios from 'axios'
 	import $ from 'jquery'
-
+	import '../../css/now.css'
+	import '../chat/src/mainChat.js'
+	
 	export default {
 		data() {
 			return {
@@ -156,7 +158,10 @@
 				},
 				sysUserName:'',
 				users: [],
+				infoMsg:{},
+				doctorInfo:{},
 				a:'',
+				fromto:'',
 				totalPage:0,
 				currentPage: 0,
 				pageSize: 10,
@@ -223,6 +228,9 @@
 		methods: {
 			//发送消息
 			sendPrivateText(){
+				//console.log(this.editForm)
+				//console.log(this.$router.params.counselor.uno)
+				let mestype='' ,content='';
 				let messages = this.a;
 				if (messages == '') {
 	                return false
@@ -232,20 +240,55 @@
 	            let msg = new WebIM.message('txt', id);      // 创建文本消息
 	            msg.set({
 	                msg: messages,                  // 消息内容
-	                to: 'knl6vl5d8hglb8yhsx',                          // 接收消息对象（用户id）
+	                to: this.infoMsg.consumerUno,                          // 接收消息对象（用户id）
 	                roomType: false,
 	                success: function (id, serverMsgId) {
 	                    console.log('send private text Success');
 	                    console.log(msg)
-	                    $('.dialog_chat').append('<div data-v-fcf47748 class="window-chat-txt">' + 
-	    '<div data-v-fcf47748 class="window-chat-txt-right"> '+
-	    msg.value +'</div>'+
-	    '<img data-v-fcf47748 src="/src/assets/logo.png" alt="正在加载"/>'+
-	'</div>')
+	                    mestype = msg.type;
+	                    content = msg.val;
+	                    switch(mestype){
+	                    	case 'txt':
+	                    	$('.dialog_chat').append('<div class="window-chat-txt">' + 
+			    			'<div class="window-chat-txt-right"> '+
+			    						msg.value +'</div>'+
+			    					'<img src="/src/assets/logo.png" alt="正在加载"/>'+
+							'</div>')
+							break;
+	                    }
+	                    
 	                }
 	            });
 	            msg.body.chatType = 'singleChat';
 	            conn.send(msg.body);
+	            let info = {
+	            	fromUno:this.$router.params.counselor.uno,
+	            	toUno:this.editForm.consumername,
+	            	messageType:1,
+	            	content:content
+	            }
+	            axios({//存入本地服务器
+					url: '/api/beta/easemob/chat/list.aspx',
+					type: 'post',
+					data: info,
+					transformRequest: [function (data) {
+	                // Do whatever you want to transform the data
+	                let ret = ''
+	                for (let it in data) {
+	                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+	                }
+	                return ret
+	              }],
+					headers:{
+							Authorization:this.Authorization,
+							'Content-Type': 'application/x-www-form-urlencoded'
+						}
+				}).then(res => {
+					console.log(res);
+					this.listLoading = false;
+				}).catch(err => {
+					this.listLoading = false;
+				})
 			},
 			handleClick(tab, event) {
 		        console.log(tab, event);
@@ -282,11 +325,11 @@
 						}
 				}).then(res => {
 					console.log(res);
+					this.listLoading = false;
 					this.totalPage = res.data.data.pager.recordCount;
 					this.currentPage = res.data.data.pager.pageNumber;
 					this.pageSize = res.data.data.pager.pageSize;
 					this.users = res.data.data.list;
-					this.listLoading = false;
 				}).catch(err => {
 					this.listLoading = false;
 				})
@@ -295,7 +338,37 @@
 			//显示编辑界面
 			handleEdit: function (index, row) {
 				this.editFormVisible = true;
+				window.open('/src/chat/index.html');
 				this.editForm = Object.assign({}, row);
+				console.log(row);
+				let id=row.id
+				axios({
+					url: `/api/beta/counseling/info.aspx?id=${id}`,
+					type: 'get',
+					data: '',
+					transformRequest: [function (data) {
+	                // Do whatever you want to transform the data
+	                let ret = ''
+	                for (let it in data) {
+	                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+	                }
+	                return ret
+	              }],
+					headers:{
+							Authorization:this.Authorization,
+							'Content-Type': 'application/json'
+						}
+				}).then(res => {
+					console.log(res);
+					if(res.data.status == 200){
+						this.infoMsg = res.data.data.counseling;	
+						//this.doctorInfo = res.data.data.scheme
+					}else{
+
+					}
+				}).catch(err => {
+					
+				})
 			},
 			//显示新增界面
 			/*handleAdd: function () {
@@ -364,43 +437,7 @@
 	}
 </script>
 
-<style scoped>
+<style scoped lang='less'>
 /* 聊天窗口*/
-#now-dialog{
-	margin-top: -20px;color: #666
-}
-.el-dialog--small{width:66%;}
-/* 对话框头部 */
-#now-dialog .dialog_header{font-size:18px;color:#58B7FF;line-height: 41px;border-bottom:1px solid #d1dbe5}
-.dialog_header .dialog_use{float: right;font-size: 14px;margin-right: 20px;}
-#now-dialog .new-select{border:none;width:72px;font-size:12px;}
-/* 聊天界面 */
-.dialog_chat{overflow-y:scroll;height:250px;padding:10px;}
-.window-chat-time{text-align: center;}
-.window-chat-txt{
-    position:relative;display:flex;margin-top:1rem;color:#fff;
-}
-.window-chat-txt img{display:block;width:50px;height:50px;border-radius: 50%;}
-.window-chat-txt div{display: flex;flex:1;justify-content: center;align-items: center;border-radius: 1rem;position: relative;background:#58B7FF;padding:5px;}
-.window-chat-txt .window-chat-txt-right{margin-right: 20px;}
-.window-chat-txt .window-chat-txt-left{margin-left: 20px;}
-.window-chat-txt-right:after{
-    content:'';position: absolute;top:18px;right:-15px;
-    border-width: 8px;border-style:dashed dashed dashed solid;border-color: transparent transparent transparent #58B7FF;
-}
-.window-chat-txt-left:before{
-    content:'';position: absolute;top:18px;left:-15px;
-    border-width: 8px;border-style:dashed solid dashed dashed;border-color: transparent #58B7FF transparent transparent;
-}
 
-.window_right_msg{padding-top: 10px;padding-left:40px;position:relative;line-height:2;height:160px;}
-.window_right_icon{position: absolute;width:15px;height:15px;background-color:red;top:16px;left:20px;}
-.dialog_foot{border-top: 1px solid #bfcbd9}
-/**/
-.window_right_msg1{padding: 10px;
-    position: relative;text-align: center;
-    line-height: 2;}
-.window_right_price{height: 48px;display: flex;justify-content: space-around;align-items: center}
-#progess{height: 340px; overflow-y:scroll;}
-.box-card{border: none}
 </style>

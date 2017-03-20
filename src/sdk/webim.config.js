@@ -14,7 +14,7 @@ WebIM.config = {
     /*
      * Backend REST API URL
      */
-    apiURL: 'http://a1.easemob.com',
+    apiURL: (location.protocol === 'https:' ? 'https:' : 'http:') + '//a1.easemob.com',
     /*
      * Application AppKey
      */

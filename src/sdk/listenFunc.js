@@ -2,7 +2,7 @@
  * Created by Administrator on 2017/2/27.
  */
 
-let conn = new WebIM.connection({
+const conn = new WebIM.connection({
     https: WebIM.config.https,
     url: WebIM.config.xmppURL,
     isAutoLogin: WebIM.config.isAutoLogin,
@@ -22,10 +22,13 @@ conn.listen({
     onTextMessage: function ( message ) {
     	this.editFormVisible = true;
         console.log(message);
-        document.getElementsByClassName('dialog_chat').appendChild('<div data-v-fcf47748 class="window-chat-txt">'+
-	    '<img data-v-fcf47748 src="/src/assets/logo.png" alt="正在加载"/>'+
-	    '<div data-v-fcf47748 class="window-chat-txt-left">' +
-	    message.data +'</div>'+
+        var from = message.from;//消息的发送者
+        var mestype = message.type;//消息发送的类型是群组消息还是个人消息
+        var messageContent = message.data;
+        $('.dialog_chat').append('<div v-html class="window-chat-txt">'+
+	    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
+	    '<div  class="window-chat-txt-left">' +
+	    messageContent +'</div>'+
 	'</div>');
     },    //收到文本消息
     onEmojiMessage: function ( message ) {
@@ -95,3 +98,4 @@ WebIM.utils.isCanDownLoadFile ;
 WebIM.utils.hasSetRequestHeader;
 //是否设置mimetype
 WebIM.utils.hasOverrideMimeType;
+
