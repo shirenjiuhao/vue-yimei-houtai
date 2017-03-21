@@ -2,7 +2,7 @@
  * Created by Administrator on 2017/2/27.
  */
 
-let conn = new WebIM.connection({
+const conn = new WebIM.connection({
     https: WebIM.config.https,
     url: WebIM.config.xmppURL,
     isAutoLogin: WebIM.config.isAutoLogin,

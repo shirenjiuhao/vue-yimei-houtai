@@ -29,6 +29,10 @@ module.exports = {
         loader:'style-loader!css-loader'
       },
       {
+        test:/\.less$/,
+        loader:'style-loader!css-loader!less-loader'
+      },
+      {
         test: /\.(png|jpg|gif|svg|woff|ttf)$/,
         loader: 'file-loader',
         options: {

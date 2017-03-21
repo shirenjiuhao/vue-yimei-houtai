@@ -119,7 +119,7 @@
 									  </div>
 									</el-card>
 						            <div class="window_right_msg1">
-						                <el-button size="large" icon='plus'>添加方案</el-button>
+						                <el-button size="large" icon='plus' @click.native='addProgess'>添加方案</el-button>
 						            </div>
 						            <div class="window_right_msg1">
 						                <div class="window_right_price">
@@ -133,13 +133,29 @@
 					  </el-tabs>
 				</el-col> 
 		 	</section>
-
-			<!-- <el-form :model="editForm" label-width="80px" :rules='editFormRules' ref="editForm"  name='editForm' action="/momingtang/web/backCourse/updateCourse" enctype='multipart/form-data' id='editForm' method='post'
-			>
-			<div slot="footer" class="dialog-footer">
-				<el-button @click.native="editFormVisible = false">取消</el-button>
-				<el-button type="primary" @click.native="editSubmit" :loading="editLoading">提交</el-button>
-			</div> -->
+		</el-dialog>
+		<el-dialog title="添加方案" v-model="addFormVisible" :close-on-click-modal="false"  style='padding-bottom:10px;'>
+			<el-form :model="addForm" name='addForm'>
+			    <el-form-item label="名称" label-width="80px">
+			      <el-input v-model="addForm.name" class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+			    <el-form-item label="功效" label-width="80px">
+			      <el-input v-model='addForm.desp.gongxiao' class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+			    <el-form-item label="规格" label-width="80px">
+			      <el-input v-model='addForm.desp.guige' class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+			     <el-form-item label="价格" label-width="80px">
+			      <el-input v-model='addForm.cPrice' type='number' class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+			    <el-form-item label="数量" label-width="80px">
+			      <el-input v-model='addForm.num' type='number' class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+		    </el-form>
+		    <div slot="footer" class="dialog-footer">
+			    <el-button @click="dialogFormVisible = false">取 消</el-button>
+			    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+		    </div>
 		</el-dialog>
 	</section>
 </template>
@@ -147,6 +163,7 @@
 <script>
 	import axios from 'axios'
 	import $ from 'jquery'
+	import '../../css/now.css'
 
 	export default {
 		data() {
@@ -160,11 +177,12 @@
 				totalPage:0,
 				currentPage: 0,
 				pageSize: 10,
-				listURL:'api/beta/counseling/list.aspx?status=1',
-				Authorization:`MEDCOS#${this.$router.params.sessionKey}`,
+				listURL:'api/beta/counseling/list.aspx?status=1',//请求url
+				Authorization:`MEDCOS#${this.$router.params.sessionKey}`,//设置请求
 				listLoading: false,
-				status:1,
-				options:[{name:'有效对话',key:1},{name:'无效对话',key:2}],
+				usersUno:this.$router.params.counselor.uno,//发送者环信ID
+				toUser:'',
+				options:[{name:'当前对话',key:1},{name:'无效对话',key:2}],
 				activeName: 'first',
 				lishi:[{firsttime:'2017-03-17'},{firsttime:'2017-03-17'}],
 				progess:['名称：润白眼玻尿酸1M',
@@ -186,37 +204,23 @@
 
 				editFormVisible: false,//编辑界面是否显示
 				editLoading: false,
-				editFormRules: {
-					/*sName: [
-						{ required: true, message: '请输入姓名', trigger: 'blur' }
-					]*/
-				},
+				
 				//编辑界面数据
 				editForm: {
-					sid: 0,
-				    sName: "",
-				    cover: "",
-				    sdetailsPic: "",
-				    businessHours: "",
-				    address: "",
-				    province: "",
-				    city: "",
-				    attribution:''
+					
 				},
 
 				addFormVisible: false,//新增界面是否显示
 				addLoading: false,
-				addFormRules: {
-					/*province: [
-						{ required: true, message: '请选择省份', trigger: 'blur' }
-					],
-					city: [
-						{ required: true, message: '请选择省份', trigger: 'blur' }
-					],*/
-					sName: [
-						{ required: true, message: '请输入名称', trigger: 'blur' }
-					]
-				},
+				addForm:{
+					name:'',
+					cPrice:'',
+					num:'',
+					desp:{
+						guige:'',
+						gongxiao:''
+					}
+				}
 				//新增界面数据
 			}
 		},
@@ -232,15 +236,15 @@
 	            let msg = new WebIM.message('txt', id);      // 创建文本消息
 	            msg.set({
 	                msg: messages,                  // 消息内容
-	                to: 'knl6vl5d8hglb8yhsx',                          // 接收消息对象（用户id）
+	                to: this.toUser.consumerUno,             // 接收消息对象（用户id）
 	                roomType: false,
 	                success: function (id, serverMsgId) {
 	                    console.log('send private text Success');
 	                    console.log(msg)
-	                    $('.dialog_chat').append('<div data-v-fcf47748 class="window-chat-txt">' + 
-	    '<div data-v-fcf47748 class="window-chat-txt-right"> '+
+	                    $('.dialog_chat').append('<div class="window-chat-txt">' + 
+	    '<div class="window-chat-txt-right"> '+
 	    msg.value +'</div>'+
-	    '<img data-v-fcf47748 src="/src/assets/logo.png" alt="正在加载"/>'+
+	    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
 	'</div>')
 	                }
 	            });
@@ -282,11 +286,11 @@
 						}
 				}).then(res => {
 					console.log(res);
+					this.listLoading = false;
 					this.totalPage = res.data.data.pager.recordCount;
 					this.currentPage = res.data.data.pager.pageNumber;
 					this.pageSize = res.data.data.pager.pageSize;
 					this.users = res.data.data.list;
-					this.listLoading = false;
 				}).catch(err => {
 					this.listLoading = false;
 				})
@@ -295,37 +299,35 @@
 			//显示编辑界面
 			handleEdit: function (index, row) {
 				this.editFormVisible = true;
-				this.editForm = Object.assign({}, row);
+				//this.editForm = Object.assign({}, row);
+				let id = row.id;
+				axios({
+					url: `/api/beta/counseling/info.aspx?id=${id}`,
+					type: 'get',
+					data: '',
+					transformRequest: [function (data) {
+	                // Do whatever you want to transform the data
+	                let ret = ''
+	                for (let it in data) {
+	                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+	                }
+	                return ret
+	              }],
+					headers:{
+							Authorization:this.Authorization,
+							'Content-Type': 'application/x-www-form-urlencoded'
+						}
+				}).then(res => {
+					console.log(res)
+					this.toUser = res.data.data.counseling;
+				})
 			},
 			//显示新增界面
-			/*handleAdd: function () {
+			addProgess: function () {
 				this.addFormVisible = true;
-			},*/
-			//编辑
-			editSubmit: function () {
-				/*this.$refs.editForm.validate((valid) => {
-					if (valid) {
-						this.$confirm('确认提交吗？', '提示', {}).then(() => {
-							this.editLoading = true;
-							NProgress.start();
-							let para = Object.assign({}, this.editForm);
-							para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-							editUser(para).then((res) => {
-								this.editLoading = false;
-								NProgress.done();
-								this.$notify({
-									title: '成功',
-									message: '提交成功',
-									type: 'success'
-								});
-								this.$refs['editForm'].resetFields();
-								this.editFormVisible = false;
-								this.getUsers();
-							});
-						});
-					}
-				});*/
 			},
+			//编辑
+			
 			//新增
 			addSubmit: function (e) {
 				/*this.$refs.addForm.validate((valid) => {
@@ -366,41 +368,5 @@
 
 <style scoped>
 /* 聊天窗口*/
-#now-dialog{
-	margin-top: -20px;color: #666
-}
-.el-dialog--small{width:66%;}
-/* 对话框头部 */
-#now-dialog .dialog_header{font-size:18px;color:#58B7FF;line-height: 41px;border-bottom:1px solid #d1dbe5}
-.dialog_header .dialog_use{float: right;font-size: 14px;margin-right: 20px;}
-#now-dialog .new-select{border:none;width:72px;font-size:12px;}
-/* 聊天界面 */
-.dialog_chat{overflow-y:scroll;height:250px;padding:10px;}
-.window-chat-time{text-align: center;}
-.window-chat-txt{
-    position:relative;display:flex;margin-top:1rem;color:#fff;
-}
-.window-chat-txt img{display:block;width:50px;height:50px;border-radius: 50%;}
-.window-chat-txt div{display: flex;flex:1;justify-content: center;align-items: center;border-radius: 1rem;position: relative;background:#58B7FF;padding:5px;}
-.window-chat-txt .window-chat-txt-right{margin-right: 20px;}
-.window-chat-txt .window-chat-txt-left{margin-left: 20px;}
-.window-chat-txt-right:after{
-    content:'';position: absolute;top:18px;right:-15px;
-    border-width: 8px;border-style:dashed dashed dashed solid;border-color: transparent transparent transparent #58B7FF;
-}
-.window-chat-txt-left:before{
-    content:'';position: absolute;top:18px;left:-15px;
-    border-width: 8px;border-style:dashed solid dashed dashed;border-color: transparent #58B7FF transparent transparent;
-}
-
-.window_right_msg{padding-top: 10px;padding-left:40px;position:relative;line-height:2;height:160px;}
-.window_right_icon{position: absolute;width:15px;height:15px;background-color:red;top:16px;left:20px;}
-.dialog_foot{border-top: 1px solid #bfcbd9}
-/**/
-.window_right_msg1{padding: 10px;
-    position: relative;text-align: center;
-    line-height: 2;}
-.window_right_price{height: 48px;display: flex;justify-content: space-around;align-items: center}
-#progess{height: 340px; overflow-y:scroll;}
-.box-card{border: none}
+.myInput{width:218px;}
 </style>
