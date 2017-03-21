@@ -101,6 +101,7 @@
               }   
             }).catch((err) =>{
               //console.log(err)
+              this.logining = false;
             })
           } else {
             console.log('error submit!!');

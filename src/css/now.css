@@ -8,9 +8,9 @@
 #now-dialog .new-select{border:none;width:72px;font-size:12px;}
 /* 聊天界面 */
 .dialog_chat{overflow-y:scroll;height:250px;padding:10px;}
-.window-chat-time{text-align: center;}
+.window-chat-time{text-align: center;margin-top:10px;}
 .window-chat-txt{
-    position:relative;display:flex;margin-top:1rem;color:#fff;
+    position:relative;display:flex;color:#fff;
 }
 .window-chat-txt img{display:block;width:50px;height:50px;border-radius: 50%;}
 .window-chat-txt div{display: flex;flex:1;justify-content: center;align-items: center;border-radius: 1rem;position: relative;background:#58B7FF;padding:5px;}
@@ -35,3 +35,6 @@
 .window_right_price{height: 48px;display: flex;justify-content: space-around;align-items: center}
 #progess{height: 340px; overflow-y:scroll;}
 .box-card{border: none}
+.sendImg{}
+.sendImg img:first-child{position: relative;width:200px;left: 50%;margin-left: -100px; border: 1px solid #ceced8;};
+.sendImg .touxiang{float: right;width: 50px;border-radius: 50%;}

@@ -20,13 +20,17 @@ conn.listen({
         console.log('已退出登录')
     },         //连接关闭回调
     onTextMessage: function ( message ) {
-    	this.editFormVisible = true;
         console.log(message);
-        document.getElementsByClassName('dialog_chat').appendChild('<div data-v-fcf47748 class="window-chat-txt">'+
-	    '<img data-v-fcf47748 src="/src/assets/logo.png" alt="正在加载"/>'+
-	    '<div data-v-fcf47748 class="window-chat-txt-left">' +
+        let date =  new Date();
+        let string = date.getFullYear()+'-'+date.getMonth()+1 +'-'+ date.getDate()>10?'0'+date.getDate():date.getDate() +' '+date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+        $('.dialog_chat').append('<div class="window-chat-time">'+
+            '<div>'+ string +'</div>'+
+        '</div>');
+        $('.dialog_chat').append('<div class="window-chat-txt">'+
+	    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
+	    '<div class="window-chat-txt-left">' +
 	    message.data +'</div>'+
-	'</div>');
+	   '</div>');
     },    //收到文本消息
     onEmojiMessage: function ( message ) {
         console.log('Emoji');
@@ -80,7 +84,8 @@ conn.listen({
     onError: function ( message ) {
         console.log(message);
         console.log('连接失败，请重新登录');
-        alert('请您先登录');
+        //alert('请您先登录');
+        window.location.replace('#/login');
     },          //失败回调
     onBlacklistUpdate: function (list) {       //黑名单变动
         // 查询黑名单，将好友拉黑，将好友从黑名单移除都会回调这个函数，list则是黑名单现有的所有好友信息

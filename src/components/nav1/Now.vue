@@ -11,12 +11,6 @@
 				      :picker-options="pickerOptions0">
 				    </el-date-picker>
 				</el-form-item>
-				<!-- <el-form-item>
-					<el-button type="primary" @click="getUsers">查询</el-button>
-				</el-form-item> 
-				<el-form-item style='float:right'>
-					<el-button type="primary" @click="handleAdd">新增</el-button>
-				</el-form-item> -->
 			</el-form>
 		</el-col>
 		<!--列表-->
@@ -62,11 +56,12 @@
 						 <span class='dialog_use' v-cloak>转接至：{{sysUserName}}</span>
 					</div>
 				  	<div class='dialog_chat'>
-		                <div class="window-chat-time">
+				  		<!-- <Message></Message> -->
+		                 <div class="window-chat-time">
 		                    <div>01-09 15:03 用户进入</div>
 		                    <div>由心理美容01接待</div>
 		                </div>
-		                <div class="window-chat-txt">
+		                <!-- <div class="window-chat-txt">
 		                    <img src="../../assets/logo.png" alt="正在加载"/>
 		                    <div class="window-chat-txt-left">
 		                        您好我是您的烦着，您好我是您的专属咨询师,
@@ -77,6 +72,12 @@
 		                        您好我是您的专属咨询师，您好我是您的专属咨询师
 		                    </div>
 		                    <img src="../../assets/logo.png" alt="正在加载"/>
+		                </div>  -->
+		                <div class="window-chat-time">
+		                    <div>2017-01-09 15:03:22</div>
+		                </div>
+		                <div class='sendImg'><img src="../../assets/logo.png" alt="">
+		                	<img class='touxiang' src="../../assets/1.jpg" alt="正在加载"/>
 		                </div>
 		            </div>
 		            <div class='dialog_foot'>
@@ -86,6 +87,7 @@
 						  placeholder="请输入内容"
 						  >
 						</el-input>
+						
 						<el-button @click.native='sendPrivateText'>发送</el-button>
 		            </div>
 				</el-col>
@@ -134,6 +136,8 @@
 				</el-col> 
 		 	</section>
 		</el-dialog>
+
+		<!--添加方案-->
 		<el-dialog title="添加方案" v-model="addFormVisible" :close-on-click-modal="false"  style='padding-bottom:10px;'>
 			<el-form :model="addForm" name='addForm'>
 			    <el-form-item label="名称" label-width="80px">
@@ -164,8 +168,9 @@
 	import axios from 'axios'
 	import $ from 'jquery'
 	import '../../css/now.css'
-
+	//import Message from './chat/message.vue'
 	export default {
+		//components:{ Message },
 		data() {
 			return {
 				filters: {
@@ -228,6 +233,7 @@
 			//发送消息
 			sendPrivateText(){
 				let messages = this.a;
+				let mestype='' ,content='';
 				if (messages == '') {
 	                return false
 	            }
@@ -241,16 +247,101 @@
 	                success: function (id, serverMsgId) {
 	                    console.log('send private text Success');
 	                    console.log(msg)
+	                    mestype = msg.type;
+	                    content = msg.value;
+	                    let date =  new Date();
+	                    let day = date.getDate() > 10 ? '0'+ date.getDate() : date.getDate();
+	                    let month = date.getMonth() >10 ? '0' + date.getMonth() :date.getMonth();
+	                    let hour = date.getHours() >10 ?'0'+date.getHours() : date.getHours();
+	                    let minutes = date.getMinutes() >10 ?'0'+date.getMinutes():date.getMinutes();
+	                    let seconds = date.getSeconds() >10 ?'0'+date.getSeconds():date.getSeconds()
+	                    let string = date.getFullYear()+'-'+month+1 +'-'+ day +' '+ hour + ':' + minutes + ':' + seconds ;
+	                    $('.dialog_chat').append('<div class="window-chat-time">'+
+		                    '<div>'+ string +'</div>'+
+		                '</div>');
 	                    $('.dialog_chat').append('<div class="window-chat-txt">' + 
-	    '<div class="window-chat-txt-right"> '+
-	    msg.value +'</div>'+
-	    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
-	'</div>')
+						    '<div class="window-chat-txt-right"> '+
+						    msg.value +'</div>'+
+						    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
+						'</div>');
+						$('.dialog_chat').scrollTop = $('.dialog_chat').scrollHeight - $('.dialog_chat').clientHeight;
 	                }
 	            });
 	            msg.body.chatType = 'singleChat';
 	            conn.send(msg.body);
 			},
+			//加载聊天数据
+			infoMessage(){
+				let info = {
+	            	fromUno:this.usersUno,//this.toUser.consumerUno
+	            	toUno:this.toUser.consumerUno,
+	            	pageNumber:1,
+	            	pageSize:20
+	            }
+	            let ret = ''
+	                for (let it in info) {
+	                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(info[it]) + '&'
+	                }
+	                return ret
+	            console.log(info);
+	            axios({//请求本地服务器
+					url: `/api/beta/easemob/chat/list.aspx?${ret}`,
+					type: 'get',
+					data: '',
+					/*transformRequest: [function (data) {
+	                // Do whatever you want to transform the data
+	                let ret = ''
+	                for (let it in data) {
+	                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+	                }
+	                return ret
+	              }],*/
+					headers:{
+							Authorization:this.Authorization,
+							'Content-Type': 'application/x-www-form-urlencoded'
+						}
+				}).then(res => {
+					console.log(res);
+					this.chatInfo = res.data.list
+					this.filter(this.chatInfo);
+				}).catch(err => {
+					console.log(err)
+				})
+			},
+			filter(msg) {
+				//console.log(111)
+				for(let i=0;i< msg.length ;i++){
+					if(msg[i].touno == this.usersUno){
+						$('.dialog_chat').append('<div class="window-chat-time">'+
+		                    '<div>'+ msg[i].ctime+'</div>'+
+		                '</div>');
+		                if(msg[i].msgtype == 0){
+		                	$('.dialog_chat').append('<div class="window-chat-txt">'+
+							    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
+							    '<div class="window-chat-txt-left">' +
+							    msg[i].msg +'</div>'+
+							'</div>')
+		                }
+						if(msg[i].msgtype == 1){
+							$('.dialog_chat').append('<div class="window-chat-txt">'+
+							    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
+							    '<div class="window-chat-txt-left">' +
+							    msg[i].msg +'</div>'+
+							'</div>')
+						}
+					}else{
+						$('.dialog_chat').append('<div class="window-chat-time">'+
+		                    '<div>'+ msg[i].ctime+'</div>'+
+		                '</div>');
+		                $('.dialog_chat').append('<div class="window-chat-txt">' + 
+						    '<div class="window-chat-txt-right"> '+
+						    msg[i].msg +'</div>'+
+						    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
+						'</div>')
+					}
+				}
+			},
+
 			handleClick(tab, event) {
 		        console.log(tab, event);
 		      },
@@ -320,6 +411,7 @@
 				}).then(res => {
 					console.log(res)
 					this.toUser = res.data.data.counseling;
+					this.infoMessage();
 				})
 			},
 			//显示新增界面
@@ -362,6 +454,8 @@
 				//this.sysUserAvatar =  || '';
 			}
 			this.getUsers();
+			//console.log('---------11111-----------1111--------------------')
+			//console.log(this.$store.state)
 		}
 	}
 </script>
