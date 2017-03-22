@@ -21,16 +21,8 @@ conn.listen({
     },         //连接关闭回调
     onTextMessage: function ( message ) {
         console.log(message);
-        let date =  new Date();
-        let string = date.getFullYear()+'-'+date.getMonth()+1 +'-'+ date.getDate()>10?'0'+date.getDate():date.getDate() +' '+date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
-        $('.dialog_chat').append('<div class="window-chat-time">'+
-            '<div>'+ string +'</div>'+
-        '</div>');
-        $('.dialog_chat').append('<div class="window-chat-txt">'+
-	    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
-	    '<div class="window-chat-txt-left">' +
-	    message.data +'</div>'+
-	   '</div>');
+         msgShow('receiver','text',message.data,getShowDate());
+         msgScrollTop();
     },    //收到文本消息
     onEmojiMessage: function ( message ) {
         console.log('Emoji');
@@ -45,6 +37,8 @@ conn.listen({
         var options = {url: message.url};
         options.onFileDownloadComplete = function () {
             // 图片下载成功
+            msgShow('receiver','img',message.url,getShowDate());
+            msgScrollTop()
             console.log('Image download complete!');
         };
         options.onFileDownloadError = function () {
@@ -100,3 +94,97 @@ WebIM.utils.isCanDownLoadFile ;
 WebIM.utils.hasSetRequestHeader;
 //是否设置mimetype
 WebIM.utils.hasOverrideMimeType;
+
+//滚动定位
+var msgScrollTop = function(){
+    $(msgInit.el)[0].scrollTop = $(msgInit.el)[0].scrollHeight + $(msgInit.el)[0].offsetHeight;
+}
+//发送文本消息
+var sendPrivateText = function(messages,toUno){
+    let id = conn.getUniqueId();                 // 生成本地消息id
+    let msg = new WebIM.message('txt', id);      // 创建文本消息
+    msg.set({
+        msg: messages,                  // 消息内容
+        to: toUno,    // 接收消息对象（用户id）
+        roomType: false,
+        success: function (id, serverMsgId) {
+            console.log('send private text Success');
+            let time = getShowDate()
+            console.log(msg)
+            let content = msg.value;
+            msgShow('sender','text',content,time);
+            msgScrollTop();
+        }
+    });
+    msg.body.chatType = 'singleChat';
+    conn.send(msg.body);
+ }
+ //发送图片消息
+ document.addEventListener('paste', function (e) {
+    if (e.clipboardData && e.clipboardData.types) {
+        if (e.clipboardData.items.length > 0) {
+            if (/^image\/\w+$/.test(e.clipboardData.items[0].type)) {
+                var blob = e.clipboardData.items[0].getAsFile();
+                var url = window.URL.createObjectURL(blob);
+                var id = conn.getUniqueId();             // 生成本地消息id
+                var msg = new WebIM.message('img', id);  // 创建图片消息
+                msg.set({
+                    apiUrl: WebIM.config.apiURL,
+                    file: {data: blob, url: url},
+                    to: 'username',                      // 接收消息对象
+                    roomType: false,
+                    chatType: 'singleChat',
+                    onFileUploadError: function (error) {
+                        console.log('Error');
+                    },
+                    onFileUploadComplete: function (data) {
+                        console.log('Complete');
+                    },
+                    success: function (id) {
+                        console.log('Success');
+                    }
+                });
+                conn.send(msg.body);
+            }
+        }
+    }
+});
+// 发送图片消息
+var sendPrivateImg = function (imgSrc,toUno) {
+        var id = conn.getUniqueId();
+        var msg = new WebIM.message('img', id);
+        var input = document.getElementById('image');            // 选择图片的input
+        var file = WebIM.utils.getFileUrl(input);                   // 将图片转化为二进制文件
+        var allowType = {
+            'jpg': true,
+            'gif': true,
+            'png': true,
+            'bmp': true
+        };
+        if (file.filetype.toLowerCase() in allowType) {
+            console.log('send');
+            //console.log(file);
+            var option = {
+                apiUrl: WebIM.config.apiURL,
+                file: file,
+                to: toUno ,
+                roomType: false,
+                chatType: 'singleChat',
+                onFileUploadError: function () {
+                    console.log('onFileUploadError');
+                },
+                onFileUploadComplete: function () {
+                    console.log('onFileUploadComplete'+' 发送成功');
+                },
+                success: function () {
+                    let time = getShowDate();
+                    console.log('Success');
+                    msgShow('sender','img',imgSrc,time);
+                    msgScrollTop();
+                },
+                // flashUpload: WebIM.flashUpload               // 意义待查
+            };
+            msg.set(option);
+            conn.send(msg.body);
+        }
+    };

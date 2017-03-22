@@ -55,40 +55,25 @@
 						 </select>
 						 <span class='dialog_use' v-cloak>转接至：{{sysUserName}}</span>
 					</div>
-				  	<div class='dialog_chat'>
-				  		<!-- <Message></Message> -->
-		                 <div class="window-chat-time">
-		                    <div>01-09 15:03 用户进入</div>
-		                    <div>由心理美容01接待</div>
+					<div class="window-chat-time">
+		                    <div>{{nowDate}} 用户进入</div>
+		                    <div>由<span style='color:#58B7FF'>{{sysUserName}}</span>接待</div>
 		                </div>
-		                <!-- <div class="window-chat-txt">
-		                    <img src="../../assets/logo.png" alt="正在加载"/>
-		                    <div class="window-chat-txt-left">
-		                        您好我是您的烦着，您好我是您的专属咨询师,
-		                    </div>
-		                </div>
-		                <div class="window-chat-txt">
-		                    <div class="window-chat-txt-right">
-		                        您好我是您的专属咨询师，您好我是您的专属咨询师
-		                    </div>
-		                    <img src="../../assets/logo.png" alt="正在加载"/>
-		                </div>  -->
-		                <div class="window-chat-time">
-		                    <div>2017-01-09 15:03:22</div>
-		                </div>
-		                <div class='sendImg'><img src="../../assets/logo.png" alt="">
-		                	<img class='touxiang' src="../../assets/1.jpg" alt="正在加载"/>
-		                </div>
+				  	<div id='dialog_chat'>
+				  		<!-- <Message></Message> -->   
 		            </div>
 		            <div class='dialog_foot'>
 		            	<el-input style='width:80%;' v-model='a'
-						  type="textarea" id="info_text"
-						  :autosize="{ minRows: 2, maxRows: 5}"
-						  placeholder="请输入内容"
+						  type="text" id="info_text" size='large'
+						  placeholder="请输入内容 同时按住Ctrl+Enter发送消息"
+						  @keyup.native='onKeyup'
 						  >
 						</el-input>
-						
-						<el-button @click.native='sendPrivateText'>发送</el-button>
+						<div id='chose'>
+							<input type="file" id="image" name='file' @change='handleAvatarSuccess'/>
+							<i class='el-icon-plus'></i>
+						</div>
+						<el-button @click.native='sendMessageText'>发送</el-button>
 		            </div>
 				</el-col>
 				<el-col :span="10">
@@ -179,9 +164,11 @@
 				sysUserName:'',
 				users: [],
 				a:'',
+				imageUrl: '',
 				totalPage:0,
 				currentPage: 0,
 				pageSize: 10,
+				nowDate: getShowDate(),
 				listURL:'api/beta/counseling/list.aspx?status=1',//请求url
 				Authorization:`MEDCOS#${this.$router.params.sessionKey}`,//设置请求
 				listLoading: false,
@@ -230,48 +217,71 @@
 			}
 		},
 		methods: {
+			//上传图片
+			handleAvatarSuccess() {
+				let file = $('#image')[0].files[0];
+				if(file) return true
+		      },
 			//发送消息
-			sendPrivateText(){
+			onKeyup (e) {
 				let messages = this.a;
-				let mestype='' ,content='';
-				if (messages == '') {
-	                return false
+	            if (e.ctrlKey && e.keyCode === 13 && messages.length) {
+	            	this.a = '';
+	                if(this.handleAvatarSuccess()){
+	                	let file = $('#image')[0].files[0];
+						var reader = new FileReader();  
+					    //将文件以Data URL形式读入页面  
+					    reader.readAsDataURL(file);
+					    var _this = this;  
+					    reader.onload = function(e){  
+					        //显示文件
+					        _this.imageUrl = e.target.result;
+					        //sendPrivateImg(_this.imageUrl,_this.toUser.consumerUno)
+					    } 
+						let imgSrc = this.imageUrl;
+						//console.log(this.imageUrl)
+						console.log(imgSrc + '已经获取到图片')
+		            	sendPrivateImg(imgSrc,this.toUser.consumerUno)
+		            	let obj = $('#image')[0]; 
+	            		obj.outerHTML = obj.outerHTML;
+	            		this.imageUrl = '';
+		            }
+		            if(messages !=''){
+		            	console.log('准备发送文字')
+		            	sendPrivateText(messages,this.toUser.consumerUno)
+		            }
 	            }
-	            this.a = '';
-	            let id = conn.getUniqueId();                 // 生成本地消息id
-	            let msg = new WebIM.message('txt', id);      // 创建文本消息
-	            msg.set({
-	                msg: messages,                  // 消息内容
-	                to: this.toUser.consumerUno,             // 接收消息对象（用户id）
-	                roomType: false,
-	                success: function (id, serverMsgId) {
-	                    console.log('send private text Success');
-	                    console.log(msg)
-	                    mestype = msg.type;
-	                    content = msg.value;
-	                    let date =  new Date();
-	                    let day = date.getDate() > 10 ? '0'+ date.getDate() : date.getDate();
-	                    let month = date.getMonth() >10 ? '0' + date.getMonth() :date.getMonth();
-	                    let hour = date.getHours() >10 ?'0'+date.getHours() : date.getHours();
-	                    let minutes = date.getMinutes() >10 ?'0'+date.getMinutes():date.getMinutes();
-	                    let seconds = date.getSeconds() >10 ?'0'+date.getSeconds():date.getSeconds()
-	                    let string = date.getFullYear()+'-'+month+1 +'-'+ day +' '+ hour + ':' + minutes + ':' + seconds ;
-	                    $('.dialog_chat').append('<div class="window-chat-time">'+
-		                    '<div>'+ string +'</div>'+
-		                '</div>');
-	                    $('.dialog_chat').append('<div class="window-chat-txt">' + 
-						    '<div class="window-chat-txt-right"> '+
-						    msg.value +'</div>'+
-						    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
-						'</div>');
-						$('.dialog_chat').scrollTop = $('.dialog_chat').scrollHeight - $('.dialog_chat').clientHeight;
-	                }
-	            });
-	            msg.body.chatType = 'singleChat';
-	            conn.send(msg.body);
+	        },
+			sendMessageText(){
+	            if(this.handleAvatarSuccess()){
+	            	console.log('准备发送图片')
+	            	let file = $('#image')[0].files[0];
+					var reader = new FileReader();  
+				    //将文件以Data URL形式读入页面  
+				    reader.readAsDataURL(file);
+				    var _this = this;  
+				    reader.onloadend = function(e){  
+				        //显示文件
+				        _this.imageUrl = e.target.result;
+				        
+				    } 
+					let imgSrc = this.imageUrl;
+					//console.log(this.imageUrl)
+					console.log(imgSrc + '已经获取到图片')
+					sendPrivateImg(imgSrc,this.toUser.consumerUno)
+	            	let obj = $('#image')[0]; 
+	            	obj.outerHTML = obj.outerHTML;
+	            }
+	            let messages = this.a;
+	            if(messages !== ''){
+	            	console.log('准备发送文字')
+	            	sendPrivateText(messages,this.toUser.consumerUno)
+	            	this.a='';
+	            }
 			},
 			//加载聊天数据
 			infoMessage(){
+
 				let info = {
 	            	fromUno:this.usersUno,//this.toUser.consumerUno
 	            	toUno:this.toUser.consumerUno,
@@ -279,11 +289,10 @@
 	            	pageSize:20
 	            }
 	            let ret = ''
-	                for (let it in info) {
-	                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(info[it]) + '&'
-	                }
-	                return ret
-	            console.log(info);
+                for (let it in info) {
+                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(info[it]) + '&'
+                }
+	            //console.log(ret);
 	            axios({//请求本地服务器
 					url: `/api/beta/easemob/chat/list.aspx?${ret}`,
 					type: 'get',
@@ -301,49 +310,36 @@
 							'Content-Type': 'application/x-www-form-urlencoded'
 						}
 				}).then(res => {
-					console.log(res);
+					//console.log(res);
 					this.chatInfo = res.data.list
 					this.filter(this.chatInfo);
+					msgScrollTop();
 				}).catch(err => {
 					console.log(err)
 				})
 			},
 			filter(msg) {
 				//console.log(111)
-				for(let i=0;i< msg.length ;i++){
-					if(msg[i].touno == this.usersUno){
-						$('.dialog_chat').append('<div class="window-chat-time">'+
-		                    '<div>'+ msg[i].ctime+'</div>'+
-		                '</div>');
+				for(let i = msg.length-1;i > 0;i--){
+					if(msg[i].fromuno == this.usersUno){
 		                if(msg[i].msgtype == 0){
-		                	$('.dialog_chat').append('<div class="window-chat-txt">'+
-							    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
-							    '<div class="window-chat-txt-left">' +
-							    msg[i].msg +'</div>'+
-							'</div>')
+		                	msgShow('sender','text',msg[i].msg,msg[i].ctime);
 		                }
 						if(msg[i].msgtype == 1){
-							$('.dialog_chat').append('<div class="window-chat-txt">'+
-							    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
-							    '<div class="window-chat-txt-left">' +
-							    msg[i].msg +'</div>'+
-							'</div>')
+							msgShow('receiver','img',msg[i].msg,msg[i].ctime);
 						}
 					}else{
-						$('.dialog_chat').append('<div class="window-chat-time">'+
-		                    '<div>'+ msg[i].ctime+'</div>'+
-		                '</div>');
-		                $('.dialog_chat').append('<div class="window-chat-txt">' + 
-						    '<div class="window-chat-txt-right"> '+
-						    msg[i].msg +'</div>'+
-						    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
-						'</div>')
+		                if(msg[i].msgtype == 0){
+		                	msgShow('receiver','text',msg[i].msg,msg[i].ctime);
+		                }
+						if(msg[i].msgtype == 1){
+							msgShow('receiver','img',msg[i].msg,msg[i].ctime);
+						}
 					}
 				}
 			},
-
 			handleClick(tab, event) {
-		        console.log(tab, event);
+		        //console.log(tab, event);
 		      },
 			//分页展示
 			handleCurrentChange(val) {
@@ -353,12 +349,6 @@
 			//获取用户列表
 			getUsers() {
 				this.listLoading = true;
-				/*let para = {
-					status:this.status,
-					currentPage: this.currentPage,
-					pageSize: this.pageSize,
-					//name: this.filters.name
-				}*/
 				axios({
 					url: this.listURL,
 					type: 'get',
@@ -376,7 +366,7 @@
 							'Content-Type': 'application/x-www-form-urlencoded'
 						}
 				}).then(res => {
-					console.log(res);
+					//console.log(res);
 					this.listLoading = false;
 					this.totalPage = res.data.data.pager.recordCount;
 					this.currentPage = res.data.data.pager.pageNumber;
@@ -391,7 +381,9 @@
 			handleEdit: function (index, row) {
 				this.editFormVisible = true;
 				//this.editForm = Object.assign({}, row);
+				$("#dialog_chat").empty();
 				let id = row.id;
+				//console.log(id)
 				axios({
 					url: `/api/beta/counseling/info.aspx?id=${id}`,
 					type: 'get',
@@ -463,4 +455,6 @@
 <style scoped>
 /* 聊天窗口*/
 .myInput{width:218px;}
+#chose{position: absolute;top:10px;right:8px;}
+#image{width:25px;position: absolute;top:0;right:-6px;opacity: 0}
 </style>

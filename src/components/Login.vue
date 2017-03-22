@@ -71,7 +71,7 @@
             }).then(res => {
               console.log(res);
               this.logining = false;
-              console.log('----------------------------------------------------')
+              //console.log('----------------------------------------------------')
               if (res.data.status != 200) {
                 this.$notify({
                   title: '错误',
@@ -87,7 +87,7 @@
                     appKey: WebIM.config.appkey,
                     success: function (token) {
                         alert('登陆成功');
-                        console.log(token)
+                        //console.log(token)
                          //var token = token.access_token;
                          //WebIM.utils.setCookie('webim_' + encryptUsername, token, 1);
                     },
