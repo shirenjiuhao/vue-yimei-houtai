@@ -82,16 +82,17 @@
 							<template>
 								<div class="window_right_msg">
 					                <div><i class="window_right_icon"></i>个人信息</div>
-					                <div>姓名：1498</div>
-					                <div>手机号：13634982345</div>
-					                <div>IP地址：北京</div>
-					                <div>来源页面：李敏页面详情</div>
+					                <div>姓名：{{toUser.consumerName}}</div>
+					                <div>手机号：{{toUser.tel}}</div>
+					                <div>IP地址：{{toUser.address}}</div>
+					                <div>来源页面：{{toUser.page}}</div>
 					            </div>
 					            <div class="window_right_msg">
 					                <div><i class="window_right_icon"></i>历史记录</div>
 					                <el-card class="box-card">
-									  <div v-for="o in lishi">
-									    {{'列表内容 ' + o.firsttime }}
+									  <div>
+									    <!--  v-for="o in lishi"{{'列表内容 ' + o.firsttime }} -->
+									    暂无内容
 									  </div>
 									</el-card>
 					            </div>
@@ -124,26 +125,38 @@
 
 		<!--添加方案-->
 		<el-dialog title="添加方案" v-model="addFormVisible" :close-on-click-modal="false"  style='padding-bottom:10px;'>
-			<el-form :model="addForm" name='addForm'>
-			    <el-form-item label="名称" label-width="80px">
+			<el-form :model="addForm" name='addForm' :rules='addFormRules' ref="addForm"  :inline='true'>
+				<el-form-item label="项目ID" label-width="100px" prop='schemeId'>
+			      <el-input v-model="addForm.schemeId" class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+			    <el-form-item label="项目名称" label-width="100px" prop='name'>
 			      <el-input v-model="addForm.name" class='myInput' auto-complete="off"></el-input>
 			    </el-form-item>
-			    <el-form-item label="功效" label-width="80px">
-			      <el-input v-model='addForm.desp.gongxiao' class='myInput' auto-complete="off"></el-input>
+			    <el-form-item label="使用部位" label-width="100px" prop='body'>
+			      <el-input v-model='addForm.body' class='myInput' auto-complete="off"></el-input>
 			    </el-form-item>
-			    <el-form-item label="规格" label-width="80px">
-			      <el-input v-model='addForm.desp.guige' class='myInput' auto-complete="off"></el-input>
+			    <el-form-item label="治疗时长" label-width="100px" prop='curetime'>
+			      <el-input v-model='addForm.curetime' class='myInput' auto-complete="off"></el-input>
 			    </el-form-item>
-			     <el-form-item label="价格" label-width="80px">
-			      <el-input v-model='addForm.cPrice' type='number' class='myInput' auto-complete="off"></el-input>
+			     <el-form-item label="技术理念" label-width="100px" prop='idea'>
+			      <el-input v-model='addForm.idea' class='myInput' auto-complete="off"></el-input>
 			    </el-form-item>
-			    <el-form-item label="数量" label-width="80px">
-			      <el-input v-model='addForm.num' type='number' class='myInput' auto-complete="off"></el-input>
+			    <el-form-item label="治疗效果" label-width="100px" prop='effect'>
+			      <el-input v-model='addForm.effect' class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+			    <el-form-item label="项目优势" label-width="100px" prop='advantage'>
+			      <el-input v-model='addForm.advantage' class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+			    <el-form-item label="项目金额" label-width="100px" prop='amount'>
+			      <el-input v-model='addForm.amount' type='number' class='myInput' auto-complete="off"></el-input>
+			    </el-form-item>
+			    <el-form-item label="优惠金额" label-width="100px" prop='discount'>
+			      <el-input v-model='addForm.discount' type='number' class='myInput' auto-complete="off"></el-input>
 			    </el-form-item>
 		    </el-form>
 		    <div slot="footer" class="dialog-footer">
-			    <el-button @click="dialogFormVisible = false">取 消</el-button>
-			    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+			    <el-button @click.native="addFormVisible = false">取 消</el-button>
+			    <el-button type="primary" @click.native="addSubmit" :loading="addLoading">确 定</el-button>
 		    </div>
 		</el-dialog>
 	</section>
@@ -152,6 +165,7 @@
 <script>
 	import axios from 'axios'
 	import $ from 'jquery'
+	import qs from 'qs'
 	import '../../css/now.css'
 	//import Message from './chat/message.vue'
 	export default {
@@ -173,7 +187,7 @@
 				Authorization:`MEDCOS#${this.$router.params.sessionKey}`,//设置请求
 				listLoading: false,
 				usersUno:this.$router.params.counselor.uno,//发送者环信ID
-				toUser:'',
+				toUser:[],
 				options:[{name:'当前对话',key:1},{name:'无效对话',key:2}],
 				activeName: 'first',
 				lishi:[{firsttime:'2017-03-17'},{firsttime:'2017-03-17'}],
@@ -204,16 +218,48 @@
 
 				addFormVisible: false,//新增界面是否显示
 				addLoading: false,
-				addForm:{
-					name:'',
-					cPrice:'',
-					num:'',
-					desp:{
-						guige:'',
-						gongxiao:''
-					}
-				}
+				addFormRules: {
+					schemeId: [
+						{ required: true, message: '请输入方案ID', trigger: 'blur' }
+					],
+					name:[
+						{ required: true, message: '请输入项目名称', trigger: 'blur' }
+					],
+					body:[
+						{ required: true, message: '请输入使用部位', trigger: 'blur' }
+					],
+					curetime:[
+						{ required: true, message: '请输入治疗时长', trigger: 'blur' }
+					],
+					idea:[
+						{ required: true, message: '请输入技术理念', trigger: 'blur' }
+					],
+					effect:[
+						{ required: true, message: '请输入治疗效果', trigger: 'blur' }
+					],
+					advantage:[
+						{ required: true, message: '请输入项目优势', trigger: 'blur' }
+					],
+					amount:[
+						{ required: true, message: '请输入项目金额', trigger: 'blur' }
+					],
+					discount:[
+						{ required: true, message: '请输入优惠金额', trigger: 'blur' }
+					],
+				},
 				//新增界面数据
+				addForm:{
+					id:1,//方案子项目
+					schemeId:'',//方案ID
+					name:'',//项目名称
+					body:'',//使用部位
+					curetime:'',//治疗时长
+					idea:'',//技术理念
+					effect:'',//治疗效果
+					advantage:'',//项目优势
+					amount:'',//项目金额
+					discount:'',//优惠金额
+				}
 			}
 		},
 		methods: {
@@ -223,7 +269,7 @@
 				if(file) return true
 		      },
 			//发送消息
-			onKeyup (e) {
+			onKeyup (e) {//键盘发送
 				let messages = this.a;
 	            if (e.ctrlKey && e.keyCode === 13 && messages.length) {
 	            	this.a = '';
@@ -236,15 +282,14 @@
 					    reader.onload = function(e){  
 					        //显示文件
 					        _this.imageUrl = e.target.result;
-					        //sendPrivateImg(_this.imageUrl,_this.toUser.consumerUno)
+					        sendPrivateImg(_this.imageUrl,_this.toUser.consumerUno)
+					        //sendPrivateImg(imgSrc,this.toUser.consumerUno)
+			            	let obj = $('#image')[0]; 
+		            		obj.outerHTML = obj.outerHTML;
 					    } 
 						let imgSrc = this.imageUrl;
 						//console.log(this.imageUrl)
 						console.log(imgSrc + '已经获取到图片')
-		            	sendPrivateImg(imgSrc,this.toUser.consumerUno)
-		            	let obj = $('#image')[0]; 
-	            		obj.outerHTML = obj.outerHTML;
-	            		this.imageUrl = '';
 		            }
 		            if(messages !=''){
 		            	console.log('准备发送文字')
@@ -263,25 +308,23 @@
 				    reader.onloadend = function(e){  
 				        //显示文件
 				        _this.imageUrl = e.target.result;
-				        
+				        sendPrivateImg(_this.imageUrl,_this.toUser.consumerUno)
+		            	let obj = $('#image')[0]; 
+		            	obj.outerHTML = obj.outerHTML;
 				    } 
 					let imgSrc = this.imageUrl;
 					//console.log(this.imageUrl)
 					console.log(imgSrc + '已经获取到图片')
-					sendPrivateImg(imgSrc,this.toUser.consumerUno)
-	            	let obj = $('#image')[0]; 
-	            	obj.outerHTML = obj.outerHTML;
 	            }
 	            let messages = this.a;
 	            if(messages !== ''){
+	            	this.a='';
 	            	console.log('准备发送文字')
 	            	sendPrivateText(messages,this.toUser.consumerUno)
-	            	this.a='';
 	            }
 			},
 			//加载聊天数据
 			infoMessage(){
-
 				let info = {
 	            	fromUno:this.usersUno,//this.toUser.consumerUno
 	            	toUno:this.toUser.consumerUno,
@@ -319,7 +362,7 @@
 				})
 			},
 			filter(msg) {
-				//console.log(111)
+				//获取历史聊天
 				for(let i = msg.length-1;i > 0;i--){
 					if(msg[i].fromuno == this.usersUno){
 		                if(msg[i].msgtype == 0){
@@ -410,20 +453,39 @@
 			addProgess: function () {
 				this.addFormVisible = true;
 			},
-			//编辑
 			
-			//新增
+			//新增方案
 			addSubmit: function (e) {
-				/*this.$refs.addForm.validate((valid) => {
+				this.$refs.addForm.validate((valid) => {
 					if (valid) {
 						this.$confirm('确认提交吗？', '提示', {}).then(() => {
 							this.addLoading = true;
-							NProgress.start();
 							let para = Object.assign({}, this.addForm);
-							/*para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-							addUser(para).then((res) => {
+							console.log(para)
+							para = JSON.stringify(para)
+							//var qs = qs.stringify(para)
+							axios({
+								url:'/api/beta/scheme/counselor/createByJson.aspx',
+								method: 'post',
+								data: para,
+								/*transformRequest: [function (data) {
+				                // Do whatever you want to transform the data
+				                	//return	qs.stringify(data)
+					               let ret = ''
+					                for (let it in data) {
+					                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+					                }
+					                return ret
+					            }],*/
+								headers:{
+										Authorization:this.Authorization,
+										/*'Content-Type': 'application/x-www-form-urlencoded'*/
+										/*'Content-Type':'multipart/form-data'*/
+										'Content-Type':'application/Body-raw'
+									}
+							}).then((res) => {
+								console.log(res)
 								this.addLoading = false;
-								NProgress.done();
 								this.$notify({
 									title: '成功',
 									message: '提交成功',
@@ -431,11 +493,12 @@
 								});
 								this.$refs['addForm'].resetFields();
 								this.addFormVisible = false;
-								this.getUsers();
+								console.log(res.status)
+								//this.getUsers();
 							});
 						});
 					}
-				});*/
+				});
 			}
 		},
 		mounted() {
