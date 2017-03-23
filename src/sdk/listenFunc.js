@@ -106,6 +106,7 @@ var sendPrivateText = function(messages,toUno){
     msg.set({
         msg: messages,                  // 消息内容
         to: toUno,    // 接收消息对象（用户id）
+        ext: {"msgType":1},
         roomType: false,
         success: function (id, serverMsgId) {
             console.log('send private text Success');
@@ -120,7 +121,7 @@ var sendPrivateText = function(messages,toUno){
     conn.send(msg.body);
  }
  //发送图片消息
- document.addEventListener('paste', function (e) {
+ /*document.addEventListener('paste', function (e) {
     if (e.clipboardData && e.clipboardData.types) {
         if (e.clipboardData.items.length > 0) {
             if (/^image\/\w+$/.test(e.clipboardData.items[0].type)) {
@@ -148,7 +149,7 @@ var sendPrivateText = function(messages,toUno){
             }
         }
     }
-});
+});*/
 // 发送图片消息
 var sendPrivateImg = function (imgSrc,toUno) {
         var id = conn.getUniqueId();
@@ -168,6 +169,7 @@ var sendPrivateImg = function (imgSrc,toUno) {
                 apiUrl: WebIM.config.apiURL,
                 file: file,
                 to: toUno ,
+                ext: {"msgType":2},
                 roomType: false,
                 chatType: 'singleChat',
                 onFileUploadError: function () {

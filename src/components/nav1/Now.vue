@@ -73,7 +73,7 @@
 							<input type="file" id="image" name='file' @change='handleAvatarSuccess'/>
 							<i class='el-icon-plus'></i>
 						</div>
-						<el-button @click.native='sendMessageText'>发送</el-button>
+						<el-button @click.native='sendMessageText' :loading='editLoading'>发送</el-button>
 		            </div>
 				</el-col>
 				<el-col :span="10">
@@ -101,17 +101,22 @@
 					    <el-tab-pane label="制定方案" name="second">
 							<template>
 								<section id='progess'>
-									<el-card class="box-card">
-									  <div v-for="o in progess">
-									    {{o}}
-									  </div>
+									<el-card class="box-card" v-for="o in progess" :key='o.id'>
+									    <div>项目名称：{{o.name}}</div>
+									    <div>使用部位：{{o.body}}</div>
+									    <div>治疗时长：{{o.curetime}}</div>
+									    <div>技术理念：{{o.idea}}</div>
+									    <div>治疗效果：{{o.effect}}</div>
+									    <div>项目优势：{{o.advantage}}</div>
+									    <div>项目金额：￥{{o.amount}}</div>
+									    <div>优惠金额：￥{{o.discount}}</div>
 									</el-card>
 						            <div class="window_right_msg1">
 						                <el-button size="large" icon='plus' @click.native='addProgess'>添加方案</el-button>
 						            </div>
 						            <div class="window_right_msg1">
 						                <div class="window_right_price">
-						                    <span>总价：￥148.00</span>
+						                    <span>总价：￥{{}}</span>
 						                    <el-button size="small">确认方案</el-button>
 						                </div>
 						            </div>
@@ -126,32 +131,38 @@
 		<!--添加方案-->
 		<el-dialog title="添加方案" v-model="addFormVisible" :close-on-click-modal="false"  style='padding-bottom:10px;'>
 			<el-form :model="addForm" name='addForm' :rules='addFormRules' ref="addForm"  :inline='true'>
-				<el-form-item label="项目ID" label-width="100px" prop='schemeId'>
-			      <el-input v-model="addForm.schemeId" class='myInput' auto-complete="off"></el-input>
+				<el-form-item label="医生列表" label-width="100px" prop='doctorId'>
+			      <el-select v-model="addForm.doctorId" placeholder="请选择医生">
+				    <el-option :key='item.id'
+				      v-for="item in doctors"
+				      :label="item.name"
+				      :value="item.id">
+				    </el-option>
+				  </el-select>
 			    </el-form-item>
 			    <el-form-item label="项目名称" label-width="100px" prop='name'>
-			      <el-input v-model="addForm.name" class='myInput' auto-complete="off"></el-input>
+			      <el-input v-model="addForm.name" class='myInput' placeholder="请输入项目名称" auto-complete="off"></el-input>
 			    </el-form-item>
 			    <el-form-item label="使用部位" label-width="100px" prop='body'>
-			      <el-input v-model='addForm.body' class='myInput' auto-complete="off"></el-input>
+			      <el-input v-model='addForm.body' class='myInput' placeholder="请输入使用部位" auto-complete="off"></el-input>
 			    </el-form-item>
 			    <el-form-item label="治疗时长" label-width="100px" prop='curetime'>
-			      <el-input v-model='addForm.curetime' class='myInput' auto-complete="off"></el-input>
+			      <el-input v-model='addForm.curetime' class='myInput' placeholder="请输入治疗时长" auto-complete="off"></el-input>
 			    </el-form-item>
 			     <el-form-item label="技术理念" label-width="100px" prop='idea'>
-			      <el-input v-model='addForm.idea' class='myInput' auto-complete="off"></el-input>
+			      <el-input v-model='addForm.idea' class='myInput' placeholder="请输入技术理念" auto-complete="off"></el-input>
 			    </el-form-item>
 			    <el-form-item label="治疗效果" label-width="100px" prop='effect'>
-			      <el-input v-model='addForm.effect' class='myInput' auto-complete="off"></el-input>
+			      <el-input v-model='addForm.effect' class='myInput' placeholder="请输入治疗效果" auto-complete="off"></el-input>
 			    </el-form-item>
 			    <el-form-item label="项目优势" label-width="100px" prop='advantage'>
-			      <el-input v-model='addForm.advantage' class='myInput' auto-complete="off"></el-input>
+			      <el-input v-model='addForm.advantage' class='myInput' placeholder="请输入项目优势" auto-complete="off"></el-input>
 			    </el-form-item>
 			    <el-form-item label="项目金额" label-width="100px" prop='amount'>
-			      <el-input v-model='addForm.amount' type='number' class='myInput' auto-complete="off"></el-input>
+			      <el-input v-model='addForm.amount' type='number' placeholder="请输入项目金额" class='myInput' auto-complete="off"></el-input>
 			    </el-form-item>
 			    <el-form-item label="优惠金额" label-width="100px" prop='discount'>
-			      <el-input v-model='addForm.discount' type='number' class='myInput' auto-complete="off"></el-input>
+			      <el-input v-model='addForm.discount' type='number' placeholder="请输入优惠金额" class='myInput' auto-complete="off"></el-input>
 			    </el-form-item>
 		    </el-form>
 		    <div slot="footer" class="dialog-footer">
@@ -177,36 +188,30 @@
 				},
 				sysUserName:'',
 				users: [],
-				a:'',
-				imageUrl: '',
-				totalPage:0,
-				currentPage: 0,
-				pageSize: 10,
-				nowDate: getShowDate(),
-				listURL:'api/beta/counseling/list.aspx?status=1',//请求url
+				a:'',//发送消息的model
+				imageUrl: '',//发送图片的Url
+				totalPage:0,//总记录数
+				currentPage: 0,//当前页
+				pageSize: 10,//每页显示多少
+				nowDate: getShowDate(),//获取当前时间
+				listURL:'api/beta/counseling/list.aspx?status=1',//请求url 当前会话列表
 				Authorization:`MEDCOS#${this.$router.params.sessionKey}`,//设置请求
 				listLoading: false,
 				usersUno:this.$router.params.counselor.uno,//发送者环信ID
-				toUser:[],
+				toUser:[],//接收者信息
 				options:[{name:'当前对话',key:1},{name:'无效对话',key:2}],
-				activeName: 'first',
+				activeName: 'first',//默认选项卡
 				lishi:[{firsttime:'2017-03-17'},{firsttime:'2017-03-17'}],
-				progess:['名称：润白眼玻尿酸1M',
-						'手机号：13634982345',
-						'治疗时长：10分钟',
-						'技术理念：李敏页面详情',
-						'治疗效果：李敏页面详情',
-						'项目优势：李敏页面详情',
-						'价格：李敏页面详情'
-						],
-				chatInfo:[],		
+				doctors:[],//医生列表
+				progess:[],//项目方案详情
+				chatInfo:[],//聊天记录
+				orderPrice:'',//总价		
 
 				pickerOptions0: {//时间选择
 		          disabledDate(time) {
 		            return time.getTime() < Date.now() - 8.64e7;
 		          }
 		        },
-
 
 				editFormVisible: false,//编辑界面是否显示
 				editLoading: false,
@@ -219,8 +224,8 @@
 				addFormVisible: false,//新增界面是否显示
 				addLoading: false,
 				addFormRules: {
-					schemeId: [
-						{ required: true, message: '请输入方案ID', trigger: 'blur' }
+					doctorId: [
+						{ required: true, message: '请选择医生', trigger: 'change', type: "number" }
 					],
 					name:[
 						{ required: true, message: '请输入项目名称', trigger: 'blur' }
@@ -249,8 +254,9 @@
 				},
 				//新增界面数据
 				addForm:{
-					id:1,//方案子项目
-					schemeId:'',//方案ID
+					//id:1,//方案子项目
+					//schemeId:'',//方案ID
+					doctorId:'',//医生ID
 					name:'',//项目名称
 					body:'',//使用部位
 					curetime:'',//治疗时长
@@ -267,7 +273,7 @@
 			handleAvatarSuccess() {
 				let file = $('#image')[0].files[0];
 				if(file) return true
-		      },
+		    },
 			//发送消息
 			onKeyup (e) {//键盘发送
 				let messages = this.a;
@@ -297,7 +303,9 @@
 		            }
 	            }
 	        },
+	        //发送文本
 			sendMessageText(){
+				this.editLoading = true;
 	            if(this.handleAvatarSuccess()){
 	            	console.log('准备发送图片')
 	            	let file = $('#image')[0].files[0];
@@ -308,7 +316,7 @@
 				    reader.onloadend = function(e){  
 				        //显示文件
 				        _this.imageUrl = e.target.result;
-				        sendPrivateImg(_this.imageUrl,_this.toUser.consumerUno)
+				        sendPrivateImg(_this.imageUrl,_this.toUser.consumerUno);
 		            	let obj = $('#image')[0]; 
 		            	obj.outerHTML = obj.outerHTML;
 				    } 
@@ -320,8 +328,9 @@
 	            if(messages !== ''){
 	            	this.a='';
 	            	console.log('准备发送文字')
-	            	sendPrivateText(messages,this.toUser.consumerUno)
+	            	sendPrivateText(messages,this.toUser.consumerUno);
 	            }
+	            this.editLoading = false;
 			},
 			//加载聊天数据
 			infoMessage(){
@@ -338,7 +347,7 @@
 	            //console.log(ret);
 	            axios({//请求本地服务器
 					url: `/api/beta/easemob/chat/list.aspx?${ret}`,
-					type: 'get',
+					method: 'get',
 					data: '',
 					/*transformRequest: [function (data) {
 	                // Do whatever you want to transform the data
@@ -355,35 +364,38 @@
 				}).then(res => {
 					//console.log(res);
 					this.chatInfo = res.data.list
-					this.filter(this.chatInfo);
+					//console.log(this.chatInfo);
+					this.filterInfo(this.chatInfo);
 					msgScrollTop();
 				}).catch(err => {
 					console.log(err)
 				})
 			},
-			filter(msg) {
+			//生成聊天记录
+			filterInfo(msg) {
 				//获取历史聊天
-				for(let i = msg.length-1;i > 0;i--){
+				for(let i = msg.length-1;i >= 0;i--){
 					if(msg[i].fromuno == this.usersUno){
-		                if(msg[i].msgtype == 0){
+		                if(msg[i].msgtype == 0 && msg[i].msg){
 		                	msgShow('sender','text',msg[i].msg,msg[i].ctime);
 		                }
-						if(msg[i].msgtype == 1){
+						if(msg[i].msgtype == 2){
 							msgShow('receiver','img',msg[i].msg,msg[i].ctime);
 						}
 					}else{
-		                if(msg[i].msgtype == 0){
+		                if(msg[i].msgtype == 0 && msg[i].msg){
 		                	msgShow('receiver','text',msg[i].msg,msg[i].ctime);
 		                }
-						if(msg[i].msgtype == 1){
+						if(msg[i].msgtype == 2){
 							msgShow('receiver','img',msg[i].msg,msg[i].ctime);
 						}
 					}
 				}
 			},
+			//切换选项卡
 			handleClick(tab, event) {
 		        //console.log(tab, event);
-		      },
+		    },
 			//分页展示
 			handleCurrentChange(val) {
 				this.currentPage = val;
@@ -409,36 +421,92 @@
 							'Content-Type': 'application/x-www-form-urlencoded'
 						}
 				}).then(res => {
-					//console.log(res);
+					console.log(res);
 					this.listLoading = false;
-					this.totalPage = res.data.data.pager.recordCount;
+					//this.totalPage = res.data.data.pager.recordCount;
 					this.currentPage = res.data.data.pager.pageNumber;
 					this.pageSize = res.data.data.pager.pageSize;
-					this.users = res.data.data.list;
+					//let list = res.data.data.list;
+					//let list = listUsers(res.data.data.list);
+					this.users = listUsers(res.data.data.list);;
+					this.totalPage = this.users.length
 				}).catch(err => {
 					this.listLoading = false;
 				})
 			},
-			
-			//显示编辑界面
-			handleEdit: function (index, row) {
+			//获取医生列表
+			getDoctor(){
+				let para = {
+					hospitalId: this.toUser.hospitalId
+				};
+				axios({
+					url: '/api/beta/doctor/list.aspx',
+					method: 'get',
+					data: para,
+					transformRequest: [function (data) {
+	                // Do whatever you want to transform the data
+		                let ret = ''
+		                for (let it in data) {
+		                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+		                }
+		                return ret
+	                }],
+					headers:{
+						Authorization:this.Authorization,
+						'Content-Type': 'application/x-www-form-urlencoded'
+					}
+				}).then(res => {
+					console.log(res)
+					this.doctors = res.data.data.list;
+				})
+			},
+			//获取方案详情
+			/*getProgess(item){
+				let params = {
+					schemeId: item
+				}
+				axios({
+					url:'/api/beta/scheme/counselor/info.aspx',
+					method:'get',
+					data: params,
+					transformRequest: [function (data) {
+	                // Do whatever you want to transform the data
+		                let ret = ''
+		                for (let it in data) {
+		                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+		                }
+		                return ret
+	                }],
+					headers:{
+						Authorization:this.Authorization,
+						'Content-Type': 'application/x-www-form-urlencoded'
+					}
+				}).then(res => {
+					console.log(res)
+				})
+			},*/
+			//显示聊天界面
+			handleEdit (index, row) {
 				this.editFormVisible = true;
 				//this.editForm = Object.assign({}, row);
+				this.progess = JSON.parse(localStorage.getItem(this.toUser.consumerId))
+				console.log(this.progess)
+				//this.getOrderPrice(this.progess);
 				$("#dialog_chat").empty();
 				let id = row.id;
 				//console.log(id)
 				axios({
 					url: `/api/beta/counseling/info.aspx?id=${id}`,
-					type: 'get',
+					method: 'get',
 					data: '',
 					transformRequest: [function (data) {
 	                // Do whatever you want to transform the data
-	                let ret = ''
-	                for (let it in data) {
-	                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
-	                }
-	                return ret
-	              }],
+		                let ret = ''
+		                for (let it in data) {
+		                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+		                }
+		                return ret
+		            }],
 					headers:{
 							Authorization:this.Authorization,
 							'Content-Type': 'application/x-www-form-urlencoded'
@@ -449,34 +517,33 @@
 					this.infoMessage();
 				})
 			},
-			//显示新增界面
-			addProgess: function () {
+			//显示新增方案界面
+			addProgess () {
 				this.addFormVisible = true;
+				this.getDoctor();
 			},
 			
 			//新增方案
-			addSubmit: function (e) {
+			addSubmit (e) {
 				this.$refs.addForm.validate((valid) => {
 					if (valid) {
 						this.$confirm('确认提交吗？', '提示', {}).then(() => {
 							this.addLoading = true;
 							let para = Object.assign({}, this.addForm);
-							console.log(para)
-							para = JSON.stringify(para)
-							//var qs = qs.stringify(para)
+							let params = {
+								counselorId: this.$router.params.counselor.id,
+								hospitalId: this.toUser.hospitalId,
+								consumerId: this.toUser.consumerId,
+								reserveTime: this.nowDate,
+								doctorId: this.addForm.doctorId,
+								items:[para]
+							};
+							//console.log(para)
+							params = JSON.stringify(params)
 							axios({
 								url:'/api/beta/scheme/counselor/createByJson.aspx',
 								method: 'post',
-								data: para,
-								/*transformRequest: [function (data) {
-				                // Do whatever you want to transform the data
-				                	//return	qs.stringify(data)
-					               let ret = ''
-					                for (let it in data) {
-					                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
-					                }
-					                return ret
-					            }],*/
+								data: params,
 								headers:{
 										Authorization:this.Authorization,
 										/*'Content-Type': 'application/x-www-form-urlencoded'*/
@@ -486,16 +553,30 @@
 							}).then((res) => {
 								console.log(res)
 								this.addLoading = false;
-								this.$notify({
-									title: '成功',
-									message: '提交成功',
-									type: 'success'
-								});
+								if(res.data.status == 200){
+									this.$notify({
+										title: '成功',
+										message: '提交成功',
+										type: 'success'
+									});
+								}else{
+									this.$notify({
+										title: '失败',
+										message: '提交成功',
+										type: 'error'
+									});
+								}
 								this.$refs['addForm'].resetFields();
 								this.addFormVisible = false;
-								console.log(res.status)
-								//this.getUsers();
-							});
+								//let schemeId = res.data.data.id ;
+								this.progess = res.data.data.items;
+								//this.getOrderPrice(this.progess)
+								localStorage.setItem(this.toUser.consumerId, JSON.stringify(this.progess))
+								//console.log(res.status)
+								//this.getProgess(schemeId);
+							}).catch(err => {
+								this.addLoading = false;
+							})
 						});
 					}
 				});
@@ -509,8 +590,6 @@
 				//this.sysUserAvatar =  || '';
 			}
 			this.getUsers();
-			//console.log('---------11111-----------1111--------------------')
-			//console.log(this.$store.state)
 		}
 	}
 </script>

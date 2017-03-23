@@ -23,16 +23,8 @@ var msgShow = function(who,type,msg,time){
         timer: time
     });
 }
-var getShowDate = function(){
-    let date =  new Date();
-    let day = date.getDate() < 10 ? '0'+ date.getDate() : date.getDate();
-    let month = date.getMonth()+1  < 10 ? '0' + (date.getMonth()+1) :date.getMonth()+1 ;
-    let hour = date.getHours() <10 ? '0'+date.getHours() : date.getHours();
-    let minutes = date.getMinutes() < 10 ? '0'+date.getMinutes():date.getMinutes();
-    let seconds = date.getSeconds() < 10 ? '0'+date.getSeconds():date.getSeconds()
-    return string = date.getFullYear()+'-'+ month +'-'+ day +' '+ hour + ':' + minutes + ':' + seconds ;
-}
-var appendMsg = function(who,type,data) {
+
+function appendMsg(who,type,data) {
     // 生成节点
     var domCreat = function(node){
         return document.createElement(node)
@@ -95,4 +87,25 @@ var appendMsg = function(who,type,data) {
     msgItem.appendChild(avatarBox);
     msgItem.appendChild(contentBox);
     document.querySelector(data.el).appendChild(msgItem);
+}
+//生成日期
+var getShowDate = function(){
+    let date =  new Date();
+    let day = date.getDate() < 10 ? '0'+ date.getDate() : date.getDate();
+    let month = date.getMonth()+1  < 10 ? '0' + (date.getMonth()+1) :date.getMonth()+1 ;
+    let hour = date.getHours() <10 ? '0'+date.getHours() : date.getHours();
+    let minutes = date.getMinutes() < 10 ? '0'+date.getMinutes():date.getMinutes();
+    let seconds = date.getSeconds() < 10 ? '0'+date.getSeconds():date.getSeconds()
+    return string = date.getFullYear()+'-'+ month +'-'+ day +' '+ hour + ':' + minutes + ':' + seconds ;
+}
+//只是单个属性值比较的对象去重
+var listUsers = function(item){
+    var arr = [],result = [];
+    for (let i = 0; i < item.length; i++) {
+        if(arr.indexOf(item[i].tel) == -1){
+             arr.push(item[i].tel)
+             result.push(item[i])
+        }
+    };
+    return result  
 }
