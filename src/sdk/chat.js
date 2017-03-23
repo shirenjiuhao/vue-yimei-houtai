@@ -37,13 +37,14 @@ function appendMsg(who,type,data) {
         contentBox = domCreat("div"),
         avatar = domCreat("img"),
         triangle = domCreat("div");
+
     //时间节点
-    
     var msgTextNode = domCreat("span");
     var textnode=document.createTextNode(data.timer);
     msgTextNode.appendChild(textnode);
     timeBox.appendChild(msgTextNode);
     timeBox.className='chat-history-date';
+
     // 头像节点
     avatarBox.className="chat-avatar";
     avatar.src = (who=="sender")?data.senderAvatar:data.receiverAvatar;
@@ -62,15 +63,15 @@ function appendMsg(who,type,data) {
             msgTextNode.appendChild(textnode);
             contentBox.appendChild(msgTextNode);
             break;
-        case "url":
-            var msgUrlNode = domCreat("a");
-            var textnode=document.createTextNode(data.msg);
-            if(data.indexOf('http://') < 0){
-                data.msg = "http://" + data.msg;
-            }
-            msgUrlNode.setAttribute("href",data.msg); 
-            msgUrlNode.appendChild(textnode);
-            contentBox.appendChild(msgUrlNode);            
+        case "info":
+           // var msgInfoNode = domCreat("div");
+            //var textnode=document.createTextNode(data.msg);
+           // if(data.indexOf('http://') < 0){
+            //    data.msg = "http://" + data.msg;
+            //}
+            //msgInfoNode.setAttribute("href",data.msg); 
+           // msgInfoNode.appendChild(textnode);
+            contentBox.appendChild(msgInfoNode);            
             break;
         case "img":
             var msgImgNode = domCreat("img");
@@ -109,3 +110,4 @@ var listUsers = function(item){
     };
     return result  
 }
+//

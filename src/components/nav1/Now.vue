@@ -101,7 +101,7 @@
 					    <el-tab-pane label="制定方案" name="second">
 							<template>
 								<section id='progess'>
-									<el-card class="box-card" v-for="o in progess" :key='o.id'>
+									<el-card id='progessInfo' class="box-card" v-for="o in progess" :key='o.id'>
 									    <div>项目名称：{{o.name}}</div>
 									    <div>使用部位：{{o.body}}</div>
 									    <div>治疗时长：{{o.curetime}}</div>
@@ -116,8 +116,8 @@
 						            </div>
 						            <div class="window_right_msg1">
 						                <div class="window_right_price">
-						                    <span>总价：￥{{}}</span>
-						                    <el-button size="small">确认方案</el-button>
+						                    <span>总价：￥{{orderPrice}}</span>
+						                    <el-button size="small" @click.native='sendMessageInfo'>确认方案</el-button>
 						                </div>
 						            </div>
 								</section>
@@ -176,7 +176,6 @@
 <script>
 	import axios from 'axios'
 	import $ from 'jquery'
-	import qs from 'qs'
 	import '../../css/now.css'
 	//import Message from './chat/message.vue'
 	export default {
@@ -331,6 +330,12 @@
 	            	sendPrivateText(messages,this.toUser.consumerUno);
 	            }
 	            this.editLoading = false;
+			},
+			//发送方案
+			sendMessageInfo(){
+				console.log('准备发送方案')
+				console.log($('#progessInfo')[0])
+				sendPrivateInfo(this.progess,this.toUser.consumerUno)
 			},
 			//加载聊天数据
 			infoMessage(){
@@ -490,7 +495,8 @@
 				this.editFormVisible = true;
 				//this.editForm = Object.assign({}, row);
 				this.progess = JSON.parse(localStorage.getItem(this.toUser.consumerId))
-				console.log(this.progess)
+				//console.log(this.progess)
+				this.getPrice(this.progess);
 				//this.getOrderPrice(this.progess);
 				$("#dialog_chat").empty();
 				let id = row.id;
@@ -514,6 +520,7 @@
 				}).then(res => {
 					console.log(res)
 					this.toUser = res.data.data.counseling;
+					this.getPrice(this.progess);
 					this.infoMessage();
 				})
 			},
@@ -522,7 +529,16 @@
 				this.addFormVisible = true;
 				this.getDoctor();
 			},
-			
+			//获取总价
+			getPrice(e){
+				let oop = 0;
+				for(let i in e){
+					//console.log(i)
+					oop += (e[i].amount - e[i].discount)
+					//console.log(oop)
+				}
+				this.orderPrice = oop;
+			},
 			//新增方案
 			addSubmit (e) {
 				this.$refs.addForm.validate((valid) => {
@@ -570,7 +586,7 @@
 								this.addFormVisible = false;
 								//let schemeId = res.data.data.id ;
 								this.progess = res.data.data.items;
-								//this.getOrderPrice(this.progess)
+								this.getPrice(this.progess);
 								localStorage.setItem(this.toUser.consumerId, JSON.stringify(this.progess))
 								//console.log(res.status)
 								//this.getProgess(schemeId);
@@ -598,5 +614,5 @@
 /* 聊天窗口*/
 .myInput{width:218px;}
 #chose{position: absolute;top:10px;right:8px;}
-#image{width:25px;position: absolute;top:0;right:-6px;opacity: 0}
+#image{width:25px;position: absolute;top:0;right:-6px;opacity: 0;}
 </style>

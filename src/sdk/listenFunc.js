@@ -189,4 +189,24 @@ var sendPrivateImg = function (imgSrc,toUno) {
             msg.set(option);
             conn.send(msg.body);
         }
-    };
+};
+var sendPrivateInfo = function (messages,toUno) {
+    var id = conn.getUniqueId();                 // 生成本地消息id
+    var msg = new WebIM.message('txt', id);      // 创建文本消息
+    msg.set({
+        msg: messages,                  // 消息内容
+        to: toUno, 
+        ext: {"msgType":3},                         // 接收消息对象（用户id）
+        roomType: false,
+        success: function (id, serverMsgId) {
+            console.log('send private Info Success');
+            let time = getShowDate()
+            console.log(msg)
+            let content = msg.value;
+            msgShow('sender','info',content,time);
+            msgScrollTop();
+        }
+    });
+    msg.body.chatType = 'singleChat';
+    conn.send(msg.body);
+};
