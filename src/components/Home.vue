@@ -58,7 +58,7 @@
 				sysUserName: '',
 				sysUserAvatar: '',
 				logoutURL:'api/beta/counselor/logout.aspx',
-				Authorization:`MEDCOS#${this.$router.params.sessionKey}`
+				Authorization:''
 			}
 		},
 		methods: {
@@ -91,6 +91,7 @@
 						console.log(res)
 						if(res.data.status == 200){
 							sessionStorage.removeItem('user');
+							localStorage.removeItem('COUNNAME')
 							this.$router.push('/login');
 						}
 					})
@@ -107,6 +108,12 @@
 				user = JSON.parse(user);
 				this.sysUserName = user.username || '';
 				//this.sysUserAvatar =  || '';
+			}
+			var userInfo = localStorage.getItem('COUNNAME');
+			if (userInfo) {
+				userInfo = JSON.parse(userInfo);
+				//console.log(userInfo)
+				this.Authorization = `MEDCOS#${userInfo.sessionKey}`;
 			}
 		}
 	}

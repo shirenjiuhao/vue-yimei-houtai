@@ -79,7 +79,8 @@
                   type: 'error'
                 });
               } else {
-                this.$router.params = res.data.data;
+                let userInfo = res.data.data
+                //this.$router.params = res.data.data;
                 var signIn = {
                     apiUrl: WebIM.config.apiURL,
                     user: res.data.data.counselor.uno,
@@ -96,6 +97,7 @@
                     }
                 };
                 sessionStorage.setItem('user', JSON.stringify(loginParams));
+                localStorage.setItem('COUNNAME', JSON.stringify(userInfo))
                 this.$router.push({ path: '/now' });
                 conn.open(signIn);
               }   

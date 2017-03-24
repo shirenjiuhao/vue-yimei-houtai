@@ -79,6 +79,7 @@ conn.listen({
         console.log(message);
         console.log('连接失败，请重新登录');
         //alert('请您先登录');
+        localStorage.removeItem('COUNNAME')
         window.location.replace('#/login');
     },          //失败回调
     onBlacklistUpdate: function (list) {       //黑名单变动
@@ -195,8 +196,8 @@ var sendPrivateInfo = function (messages,toUno) {
     var msg = new WebIM.message('txt', id);      // 创建文本消息
     msg.set({
         msg: messages,                  // 消息内容
-        to: toUno, 
-        ext: {"msgType":3},                         // 接收消息对象（用户id）
+        to: toUno,                     // 接收消息对象（用户id）
+        ext: {"msgType":3},                         
         roomType: false,
         success: function (id, serverMsgId) {
             console.log('send private Info Success');

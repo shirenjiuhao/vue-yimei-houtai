@@ -1,14 +1,15 @@
 #now-dialog{
-	margin-top: -20px;color: #666
+	color: #666
 }
 .el-dialog--small{width:66%;}
 
-#now-dialog .dialog_header{font-size:18px;color:#58B7FF;line-height: 41px;border-bottom:1px solid #d1dbe5}
+#now-dialog .dialog_header{font-size:18px;color:#58B7FF;line-height: 41px;border-bottom:1px solid #d1dbe5;padding-left: 10px}
 .dialog_header .dialog_use{float: right;font-size: 14px;margin-right: 20px;}
 #now-dialog .new-select{border:none;width:72px;font-size:12px;}
 /* 聊天界面 */
-#dialog_chat{overflow-y:scroll;height:240px;}
-.window-chat-time{text-align: center;margin-top:10px;}
+#dialog_chat{overflow-y:scroll;height:332px;}
+.window-chat-time{text-align: center;padding: 10px 0;
+    border-bottom: 1px solid #d1dbe5;}
  
 
 .window_right_msg{padding-top: 10px;padding-left:40px;position:relative;line-height:2;height:160px;}
@@ -19,5 +20,3 @@
     position: relative;text-align: center;
     line-height: 2;}
 .window_right_price{height: 48px;display: flex;justify-content: space-around;align-items: center}
-#progess{height: 340px; overflow-y:scroll;}
-.box-card{border: none}

@@ -64,14 +64,16 @@ function appendMsg(who,type,data) {
             contentBox.appendChild(msgTextNode);
             break;
         case "info":
-           // var msgInfoNode = domCreat("div");
-            //var textnode=document.createTextNode(data.msg);
-           // if(data.indexOf('http://') < 0){
-            //    data.msg = "http://" + data.msg;
-            //}
-            //msgInfoNode.setAttribute("href",data.msg); 
-           // msgInfoNode.appendChild(textnode);
-            contentBox.appendChild(msgInfoNode);            
+           var msgInfoNode = domCreat("div");
+           //var arr = [];           
+           var textnode=document.createTextNode('您已推送方案');
+           msgInfoNode.appendChild(textnode)
+           //var textnode=document.createTextNode(data.msg);
+           /*if(data.indexOf('http://') < 0){
+               data.msg = "http://" + data.msg;
+            }
+            msgInfoNode.setAttribute("href",data.msg); */
+            contentBox.appendChild(msgInfoNode); 
             break;
         case "img":
             var msgImgNode = domCreat("img");
@@ -93,10 +95,10 @@ function appendMsg(who,type,data) {
 var getShowDate = function(){
     let date =  new Date();
     let day = date.getDate() < 10 ? '0'+ date.getDate() : date.getDate();
-    let month = date.getMonth()+1  < 10 ? '0' + (date.getMonth()+1) :date.getMonth()+1 ;
-    let hour = date.getHours() <10 ? '0'+date.getHours() : date.getHours();
-    let minutes = date.getMinutes() < 10 ? '0'+date.getMinutes():date.getMinutes();
-    let seconds = date.getSeconds() < 10 ? '0'+date.getSeconds():date.getSeconds()
+    let month = date.getMonth()+1  < 10 ? '0' + (date.getMonth()+1) : date.getMonth()+1 ;
+    let hour = date.getHours() <10 ? '0'+ date.getHours() : date.getHours();
+    let minutes = date.getMinutes() < 10 ? '0'+ date.getMinutes() : date.getMinutes();
+    let seconds = date.getSeconds() < 10 ? '0'+ date.getSeconds() : date.getSeconds()
     return string = date.getFullYear()+'-'+ month +'-'+ day +' '+ hour + ':' + minutes + ':' + seconds ;
 }
 //只是单个属性值比较的对象去重
