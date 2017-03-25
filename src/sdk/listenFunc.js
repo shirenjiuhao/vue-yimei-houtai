@@ -193,11 +193,12 @@ var sendPrivateImg = function (imgSrc,toUno) {
 };
 var sendPrivateInfo = function (messages,toUno) {
     var id = conn.getUniqueId();                 // 生成本地消息id
-    var msg = new WebIM.message('txt', id);      // 创建文本消息
+    var msg = new WebIM.message('cmd', id);      // 创建文本消息
     msg.set({
         msg: messages,                  // 消息内容
         to: toUno,                     // 接收消息对象（用户id）
-        ext: {"msgType":3},                         
+        ext: {"msgType":3}, 
+        action:'action',                        
         roomType: false,
         success: function (id, serverMsgId) {
             console.log('send private Info Success');

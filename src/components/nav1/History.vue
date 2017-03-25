@@ -63,7 +63,7 @@
 				currentPage: 0,
 				pageSize: 10,
 				listURL:'api/beta/counseling/list.aspx?status=2',
-				Authorization:`MEDCOS#${this.$router.params.sessionKey}`,
+				Authorization:'',
 				listLoading: false,
 
 				editFormVisible: false,//编辑界面是否显示
@@ -235,7 +235,13 @@
 			}
 		},
 		mounted() {
-			this.getUsers();
+			var userInfo = localStorage.getItem('COUNNAME');
+			if (userInfo) {
+				userInfo = JSON.parse(userInfo);
+				//console.log(userInfo)
+				this.Authorization = `MEDCOS#${userInfo.sessionKey}`;
+				this.getUsers();
+			}
 		}
 	}
 </script>

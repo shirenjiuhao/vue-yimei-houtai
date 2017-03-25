@@ -3,6 +3,7 @@
 	 	<section id='now-dialog'>
 	 		<el-col :span="14" style='border-right:1px solid #d1dbe5'>
 				<div class='dialog_header'>
+					<el-button @click.native='backUpPage'>返回</el-button>
 					<span>医美</span>
 					<select seleted='1' placeholder="请选择" class='new-select'>
 					    <option
@@ -82,8 +83,9 @@
 					</el-tab-pane>
 					<el-tab-pane label="方案列表" name="third">
 						<section class='progessList'>
-							<el-card class='box-card' v-for="o in AllProgess" :key='o.id'>
-							    <div>项目名称：{{o.name}}</div>
+							<el-card class='box-card' v-for="item in AllProgess" :key='item.id'>
+							<div v-for='o in item.items' style='border-bottom:1px solid #d1dbe5'>
+								<div>项目名称：{{o.name}}</div>
 							    <div>使用部位：{{o.body}}</div>
 							    <div>治疗时长：{{o.curetime}}</div>
 							    <div>技术理念：{{o.idea}}</div>
@@ -91,6 +93,7 @@
 							    <div>项目优势：{{o.advantage}}</div>
 							    <div>项目金额：￥{{o.amount}}</div>
 							    <div>优惠金额：￥{{o.discount}}</div>
+							</div>
 							</el-card>
 						</section>
 					</el-tab-pane>
@@ -167,31 +170,7 @@
 				progess:[],//项目方案详情
 				chatInfo:[],//聊天记录
 				orderPrice:'',//总价
-				AllProgess:[{
-                        "id": 9,
-                        "name": "玻尿酸",
-                        "body": "面部",
-                        "curetime": "1天",
-                        "idea": "就是牛逼9",
-                        "effect": "缓解皮肤衰老",
-                        "advantage": "见效快",
-                        "amount": 19.8,
-                        "discount": 0,
-                        "schemeId": 9,
-                        "status": 1
-                    },{
-                        "id": 9,
-                        "name": "玻尿酸",
-                        "body": "面部",
-                        "curetime": "1天",
-                        "idea": "就是牛逼9",
-                        "effect": "缓解皮肤衰老",
-                        "advantage": "见效快",
-                        "amount": 19.8,
-                        "discount": 0,
-                        "schemeId": 9,
-                        "status": 1
-                    }],//所有方案记录		
+				AllProgess:[],//所有方案记录		
 
 				pickerOptions0: {//时间选择
 		          disabledDate(time) {
@@ -249,6 +228,10 @@
 			}
 		},
 		methods: {
+			//返回上一页
+			backUpPage(){
+				window.history.go(-1)
+			},
 			//上传图片
 			handleAvatarSuccess() {
 				let file = $('#image')[0].files[0];
@@ -392,10 +375,10 @@
 		                	msgShow('sender','text',msg[i].msg,msg[i].ctime);
 		                }
 						if(msg[i].msgtype == 2 && msg[i].msg){
-							msgShow('receiver','img',msg[i].msg,msg[i].ctime);
+							msgShow('sender','img',msg[i].msg,msg[i].ctime);
 						}
 						if(msg[i].msgtype == 3 && msg[i].msg){
-							msgShow('receiver','info',msg[i].msg,msg[i].ctime);
+							msgShow('sender','info','已推送订单',msg[i].ctime);
 						}
 					}else{
 		                if(msg[i].msgtype == 1 && msg[i].msg){
@@ -409,7 +392,7 @@
 			},
 			//切换选项卡
 			handleClick(tab, event) {
-		        console.log(tab, event);
+		        //console.log(tab, event);
 		    },
 			//获取医生列表
 			getDoctor(){
@@ -469,10 +452,8 @@
 					this.infoMessage();
 				})
 			},
+			//获取方案列表
 			getAllProgess(){
-				let para = {
-
-				}
 				axios({
 					url:'/api/beta/scheme/counselor/list.aspx',
 					method:'get',
@@ -490,7 +471,8 @@
 						'Content-Type': 'application/x-www-form-urlencoded'
 					}
 				}).then(res =>{
-					console.log(res.data)
+					console.log(res.data);
+					this.AllProgess = res.data.data.list
 				})
 			},
 			//显示新增方案界面
@@ -557,8 +539,7 @@
 								this.progess = res.data.data.items;
 								this.getPrice(this.progess);
 								localStorage.setItem(this.toUser.consumerId, JSON.stringify(this.progess))
-								//console.log(res.status)
-								//this.getProgess(schemeId);
+								this.getAllProgess();
 							}).catch(err => {
 								this.addLoading = false;
 							})
@@ -581,6 +562,7 @@
 				this.Authorization = `MEDCOS#${this.userInfo.sessionKey}`;
 				this.usersUno = this.userInfo.counselor.uno;
 				this.handleEdit();
+				this.getAllProgess();
 			}
 		}
 	}

@@ -129,7 +129,6 @@
 				this.Authorization = `MEDCOS#${userInfo.sessionKey}`;
 				this.getUsers();
 			}
-			
 		}
 	}
 </script>
