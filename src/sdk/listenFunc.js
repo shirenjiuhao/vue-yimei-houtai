@@ -191,7 +191,7 @@ var sendPrivateImg = function (imgSrc,toUno) {
             conn.send(msg.body);
         }
 };
-var sendPrivateInfo = function (messages,toUno) {
+/*var sendPrivateInfo = function (messages,toUno) {
     var id = conn.getUniqueId();                 // 生成本地消息id
     var msg = new WebIM.message('cmd', id);      // 创建文本消息
     msg.set({
@@ -211,4 +211,4 @@ var sendPrivateInfo = function (messages,toUno) {
     });
     msg.body.chatType = 'singleChat';
     conn.send(msg.body);
-};
+};*/

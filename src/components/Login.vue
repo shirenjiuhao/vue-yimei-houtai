@@ -16,12 +16,11 @@
 </template>
 
 <script>
-  import axios from 'axios'
+  import { requestLogin } from '../api/api.js'
   export default {
     data() {
       return {
         logining: false,
-        loginURL:'api/beta/counselor/login.aspx',
         ruleForm2: {
           account: 'test1',
           checkPass: '123456',
@@ -41,9 +40,6 @@
       };
     },
     methods: {
-      /*handleReset2() {
-        this.$refs.ruleForm2.resetFields();
-      },*/
       handleSubmit2(ev) {
         this.$refs.ruleForm2.validate((valid) => {
           if (valid) {
@@ -53,38 +49,21 @@
               password: this.ruleForm2.checkPass,
               channel: this.ruleForm2.channel
             };
-            axios({
-              url:this.loginURL,
-              method:'post',
-              data: loginParams,
-              transformRequest: [function (data) {
-                // Do whatever you want to transform the data
-                let ret = ''
-                for (let it in data) {
-                  ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
-                }
-                return ret
-              }],
-               /*headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              }*/
-            }).then(res => {
-              console.log(res);
+            requestLogin(loginParams).then(res => {
+              console.log(res)
               this.logining = false;
-              //console.log('----------------------------------------------------')
-              if (res.data.status != 200) {
+              if (res.status != 200) {
                 this.$notify({
                   title: '错误',
                   message: res.message,
                   type: 'error'
                 });
               } else {
-                let userInfo = res.data.data
-                //this.$router.params = res.data.data;
+                let userInfo = res.data
                 var signIn = {
                     apiUrl: WebIM.config.apiURL,
-                    user: res.data.data.counselor.uno,
-                    pwd: res.data.data.counselor.easemobPwd,
+                    user: res.data.counselor.uno,
+                    pwd: res.data.counselor.easemobPwd,
                     appKey: WebIM.config.appkey,
                     success: function (token) {
                         alert('登陆成功');
@@ -100,7 +79,7 @@
                 localStorage.setItem('COUNNAME', JSON.stringify(userInfo))
                 this.$router.push({ path: '/now' });
                 conn.open(signIn);
-              }   
+               }   
             }).catch((err) =>{
               //console.log(err)
               this.logining = false;

@@ -30,10 +30,10 @@
 				</el-table-column>
 			<el-table-column label="操作" width="90">
 				<template scope="scope">
-					<el-badge :value="3" :max="99" class="item">
+					<!-- <el-badge :value="3" :max="99" class="item">
 					  <el-button size="small" @click="handleEdit(scope.$index, scope.row)">回复</el-button>
-					</el-badge>
-					<!-- <el-button size="small" @click="handleEdit(scope.$index, scope.row)">进入</el-button> -->
+					</el-badge> -->
+					<el-button size="small" @click="handleEdit(scope.$index, scope.row)">进入</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -59,7 +59,7 @@
 				currentPage: 0,//当前页
 				pageSize: 10,//每页显示多少
 				nowDate: getShowDate(),//获取当前时间
-				listURL:'api/beta/counseling/list.aspx?status=1',//请求url 当前会话列表
+				listURL:'/api/beta/counseling/list.aspx?status=1',//请求url 当前会话列表
 				Authorization:'',//设置请求
 				listLoading: false,
 				activeName: 'first',//默认选项卡

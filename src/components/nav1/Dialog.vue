@@ -302,7 +302,7 @@
 				//console.log($('#progessInfo')[0])
 				console.log(this.progess)
 				if(this.progess){
-					sendPrivateInfo(this.progess,this.toUser.consumerUno);
+					//sendPrivateInfo(this.progess,this.toUser.consumerUno);
 					let para = {
 						schemeId: this.progess[0].schemeId
 					}
@@ -322,7 +322,12 @@
 								Authorization:this.Authorization,
 								'Content-Type': 'application/x-www-form-urlencoded'
 							}
-					}).then(res => {console.log(res.data)})
+					}).then(res => {
+						console.log(res.data);
+						let time = getShowDate();
+					    msgShow('sender','info','messages',time);
+					    msgScrollTop();
+					})
 				}else{
 					alert('请添加方案')
 				}
