@@ -412,13 +412,13 @@
 			                if(InfoMsg[i].type == 'txt'){
 			                	msgShow('sender','text',InfoMsg[i].msg,InfoMsg[i].ext.time);
 			                }else{
-			                	msgShow('sender','img',InfoMsg[i].file.url,InfoMsg[i].ext.time);
+			                	msgShow('sender','img',InfoMsg[i].ext.imgSrc,InfoMsg[i].ext.time);
 			                }
 						}else{
 			                if(InfoMsg[i].type == 'txt'){
 			                	msgShow('receiver','text',InfoMsg[i].msg,InfoMsg[i].ext.time);
 			                }else{
-			                	msgShow('receiver','img',InfoMsg[i].file.url,InfoMsg[i].ext.time);
+			                	msgShow('receiver','img',InfoMsg[i].ext.imgSrc,InfoMsg[i].ext.time);
 			                }
 						}
 					}

@@ -214,7 +214,7 @@ var sendPrivateImg = function (imgSrc,toUno) {
                 apiUrl: WebIM.config.apiURL,
                 file: file,
                 to: toUno ,
-                ext: {"msgType":2,time:getShowDate()},
+                ext: {"msgType":2,time:getShowDate(),imgSrc: imgSrc},
                 roomType: false,
                 chatType: 'singleChat',
                 onFileUploadError: function () {
