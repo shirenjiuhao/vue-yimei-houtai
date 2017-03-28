@@ -1,14 +1,14 @@
 /**
  * Created by Administrator on 2017/2/27.
  */
-
+const infoMessages = [];
 const conn = new WebIM.connection({
     https: WebIM.config.https,
     url: WebIM.config.xmppURL,
     isAutoLogin: WebIM.config.isAutoLogin,
     isMultiLoginSessions: WebIM.config.isMultiLoginSessions
 });
-
+const users = JSON.parse(localStorage.getItem('COUNNAME'))
 conn.listen({
     onOpened: function ( message ) {          //连接成功回调
         // 如果isAutoLogin设置为false，那么必须手动设置上线，否则无法收消息
@@ -21,8 +21,31 @@ conn.listen({
     },         //连接关闭回调
     onTextMessage: function ( message ) {
         console.log(message);
-         msgShow('receiver','text',message.data,getShowDate());
-         msgScrollTop();
+        message.ext.time = getShowDate();
+        var msg = message;
+        infoMessages.push(msg)
+        //console.log(users)
+        $.ajax({
+            url: '/api/beta/counseling/infoByUno.aspx?formUno='+ msg.from +'&',
+            type: 'get',
+            data: '',
+            headers:{
+                Authorization:'MEDCOS#' + users.sessionKey,
+                //'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(function(res) {
+            console.log(res);
+            //console.log(res.data.counseling.consumerName)
+            sessionStorage.setItem(msg.from,JSON.stringify(infoMessages))
+            window.location.href='#/now/'+ res.data.counseling.id;
+        }).then(() => {
+            msgShow('receiver','text',msg.data,getShowDate());
+            msgScrollTop();
+        })
+        .catch(function(err) {
+            console.log(err);
+        })
     },    //收到文本消息
     onEmojiMessage: function ( message ) {
         console.log('Emoji');
@@ -37,8 +60,28 @@ conn.listen({
         var options = {url: message.url};
         options.onFileDownloadComplete = function () {
             // 图片下载成功
-            msgShow('receiver','img',message.url,getShowDate());
-            msgScrollTop()
+            message.ext.time = getShowDate();
+            infoMessages.push(message)
+           
+            $.ajax({
+                url: '/api/beta/counseling/infoByUno.aspx?formUno='+ msg.from +'&',
+                type: 'get',
+                data: '',
+                headers:{
+                    Authorization:'MEDCOS#' + users.sessionKey,
+                    //'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(function(res) {
+                console.log(res);
+                //console.log(res.data.counseling.consumerName)
+                sessionStorage.setItem(message.from,JSON.stringify(infoMessages));
+                window.location.href='#/now/'+ res.data.counseling.id;
+            }).then(() => {
+                msgShow('receiver','img',message.url,getShowDate());
+                msgScrollTop()
+            })
+            
             console.log('Image download complete!');
         };
         options.onFileDownloadError = function () {
@@ -79,7 +122,7 @@ conn.listen({
         console.log(message);
         console.log('连接失败，请重新登录');
         //alert('请您先登录');
-        localStorage.removeItem('COUNNAME')
+        //localStorage.removeItem('COUNNAME')
         window.location.replace('#/login');
     },          //失败回调
     onBlacklistUpdate: function (list) {       //黑名单变动
@@ -107,19 +150,20 @@ var sendPrivateText = function(messages,toUno){
     msg.set({
         msg: messages,                  // 消息内容
         to: toUno,    // 接收消息对象（用户id）
-        ext: {"msgType":1},
+        ext: {"msgType":1,time:getShowDate()},
         roomType: false,
         success: function (id, serverMsgId) {
             console.log('send private text Success');
-            let time = getShowDate()
             console.log(msg)
             let content = msg.value;
-            msgShow('sender','text',content,time);
+            msgShow('sender','text',content,getShowDate());
             msgScrollTop();
         }
     });
     msg.body.chatType = 'singleChat';
     conn.send(msg.body);
+    infoMessages.push(msg.body);
+    sessionStorage.setItem(toUno,JSON.stringify(infoMessages));
  }
  //发送图片消息
  /*document.addEventListener('paste', function (e) {
@@ -170,7 +214,7 @@ var sendPrivateImg = function (imgSrc,toUno) {
                 apiUrl: WebIM.config.apiURL,
                 file: file,
                 to: toUno ,
-                ext: {"msgType":2},
+                ext: {"msgType":2,time:getShowDate()},
                 roomType: false,
                 chatType: 'singleChat',
                 onFileUploadError: function () {
@@ -180,13 +224,14 @@ var sendPrivateImg = function (imgSrc,toUno) {
                     console.log('onFileUploadComplete'+' 发送成功');
                 },
                 success: function () {
-                    let time = getShowDate();
                     console.log('Success');
-                    msgShow('sender','img',imgSrc,time);
+                    msgShow('sender','img',imgSrc,getShowDate());
                     msgScrollTop();
                 },
                 // flashUpload: WebIM.flashUpload               // 意义待查
             };
+            infoMessages.push(option);
+            sessionStorage.setItem(toUno,JSON.stringify(infoMessages));
             msg.set(option);
             conn.send(msg.body);
         }

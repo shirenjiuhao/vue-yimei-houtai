@@ -33,11 +33,11 @@
 				<div class="grid-content bg-purple-light">
 					<el-col :span="24" class="breadcrumb-container">
 						<strong class="title">{{$route.name}}</strong>
-						<el-breadcrumb separator="/" class="breadcrumb-inner">
+						<!-- <el-breadcrumb separator="/" class="breadcrumb-inner">
 							<el-breadcrumb-item v-for="item in $route.matched" :key="item.id">
 								{{ item.name }}
 							</el-breadcrumb-item>
-						</el-breadcrumb>
+						</el-breadcrumb> -->
 					</el-col>
 					<el-col :span="24" class="content-wrapper">
 						<transition>

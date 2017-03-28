@@ -7,7 +7,9 @@ import AddHospital from './components/nav2/AddHospital.vue'//新增医院
 import EditHospital from './components/nav2/EditHospital.vue'//编辑医院
 import AddDoctor from './components/nav3/AddDoctor.vue'//新增医生
 import EditDoctor from './components/nav3/EditDoctor.vue'//编辑医生
-import Dialog from './components/nav1/Dialog.vue'
+import Dialog from './components/nav1/Dialog.vue'//聊天窗口
+import Dingdan from './components/nav4/Dingdan.vue'//订单中心
+import Dialog2 from './components/nav1/Dialog2.vue'
 
 let routes = [
 	{
@@ -29,9 +31,12 @@ let routes = [
 		children:[
 			{ path:'/now',component:Now,name:'当前会话'},
 			{ path:'/history',component:History,name:'历史会话'},
-			{ path:'/now/:id',component:Dialog,name:'会话窗口', hidden: true}
+			{ path:'/now/:id',component:Dialog,name:'会话窗口', hidden: true},
+			{ path:'/history/:id',component:Dialog2,name:'会话历史', hidden: true},
+			{ path:'/dingdan',component:Dingdan,name:'订单中心'}
 		]
 	},
+
 	/*{
 		path:'/',
 		component:Home,
