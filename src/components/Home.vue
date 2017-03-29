@@ -10,7 +10,6 @@
 					<span class="el-dropdown-link userinfo-inner">{{sysUserName}}</span>
 					<el-dropdown-menu slot="dropdown">
 						<el-dropdown-item>我的消息</el-dropdown-item>
-						<el-dropdown-item>设置</el-dropdown-item>
 						<el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
 					</el-dropdown-menu>
 				</el-dropdown>
@@ -90,9 +89,10 @@
 					}).then(res => {
 						console.log(res)
 						if(res.data.status == 200){
-							sessionStorage.removeItem('user');
+							sessionStorage.clear();
 							localStorage.removeItem('COUNNAME')
 							this.$router.push('/login');
+							conn.close();
 						}
 					})
 				}).catch(() => {

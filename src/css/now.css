@@ -13,7 +13,7 @@
  
 
 .window_right_msg{padding-top: 10px;padding-left:40px;position:relative;line-height:2;height:160px;}
-.window_right_icon{position: absolute;width:15px;height:15px;background-color:red;top:16px;left:20px;}
+.window_right_icon{position: absolute;width:14px;height:19px;background-color:red;top:16px;left:20px;}
 .dialog_foot{border-top: 1px solid #bfcbd9;position: relative;}
 /**/
 .window_right_msg1{padding: 10px;

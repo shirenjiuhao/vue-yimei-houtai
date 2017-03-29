@@ -27,6 +27,13 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+const infoMessages = [];
+const conn = new WebIM.connection({
+    https: WebIM.config.https,
+    url: WebIM.config.xmppURL,
+    isAutoLogin: WebIM.config.isAutoLogin,
+    isMultiLoginSessions: WebIM.config.isMultiLoginSessions
+});
 
 new Vue({
   el: '#app',

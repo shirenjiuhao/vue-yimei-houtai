@@ -32,8 +32,8 @@ let routes = [
 			{ path:'/now',component:Now,name:'当前会话'},
 			{ path:'/history',component:History,name:'历史会话'},
 			{ path:'/now/:id',component:Dialog,name:'会话窗口', hidden: true},
-			{ path:'/history/:id',component:Dialog2,name:'会话历史', hidden: true},
-			{ path:'/dingdan',component:Dingdan,name:'订单中心'}
+			/*{ path:'/history/:id',component:Dialog2,name:'会话历史', hidden: true},
+			{ path:'/dingdan',component:Dingdan,name:'订单中心'}*/
 		]
 	},
 

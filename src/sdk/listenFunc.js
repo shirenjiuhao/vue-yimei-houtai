@@ -1,6 +1,8 @@
 /**
  * Created by Administrator on 2017/2/27.
  */
+ var userInfo = '';
+
 const infoMessages = [];
 const conn = new WebIM.connection({
     https: WebIM.config.https,
@@ -8,7 +10,6 @@ const conn = new WebIM.connection({
     isAutoLogin: WebIM.config.isAutoLogin,
     isMultiLoginSessions: WebIM.config.isMultiLoginSessions
 });
-const users = JSON.parse(localStorage.getItem('COUNNAME'))
 conn.listen({
     onOpened: function ( message ) {          //连接成功回调
         // 如果isAutoLogin设置为false，那么必须手动设置上线，否则无法收消息
@@ -22,26 +23,27 @@ conn.listen({
     onTextMessage: function ( message ) {
         console.log(message);
         message.ext.time = getShowDate();
-        var msg = message;
-        infoMessages.push(msg)
-        //console.log(users)
+        // var msg = message;
+        infoMessages.push(message)
+        userInfo = JSON.parse(localStorage.getItem('COUNNAME'))
+        //console.log(userInfo)
         $.ajax({
-            url: '/api/beta/counseling/infoByUno.aspx?formUno='+ msg.from +'&',
+            url: '/api/beta/counseling/infoByUno.aspx?formUno='+ message.from,
             type: 'get',
             data: '',
             headers:{
-                Authorization:'MEDCOS#' + users.sessionKey,
+                Authorization:'MEDCOS#' + userInfo.sessionKey
                 //'Content-Type': 'application/x-www-form-urlencoded'
             }
         })
         .then(function(res) {
-            console.log(res);
+            //console.log(res);
             //console.log(res.data.counseling.consumerName)
-            sessionStorage.setItem(msg.from,JSON.stringify(infoMessages))
             window.location.href='#/now/'+ res.data.counseling.id;
         }).then(() => {
-            msgShow('receiver','text',msg.data,getShowDate());
+            msgShow('receiver','text',message.data,getShowDate());
             msgScrollTop();
+            sessionStorage.setItem(message.from,JSON.stringify(infoMessages))
         })
         .catch(function(err) {
             console.log(err);
@@ -56,30 +58,31 @@ conn.listen({
     },   //收到表情消息
     onPictureMessage: function ( message ) {
         console.log('Picture');
-
+        console.log(message)
+        userInfo = JSON.parse(localStorage.getItem('COUNNAME'))
         var options = {url: message.url};
         options.onFileDownloadComplete = function () {
             // 图片下载成功
             message.ext.time = getShowDate();
-            infoMessages.push(message)
-           
+            message.ext.imgSrc = message.url;
+            infoMessages.push(message);
             $.ajax({
-                url: '/api/beta/counseling/infoByUno.aspx?formUno='+ msg.from +'&',
+                url: '/api/beta/counseling/infoByUno.aspx?formUno='+ message.from,
                 type: 'get',
                 data: '',
                 headers:{
-                    Authorization:'MEDCOS#' + users.sessionKey,
+                    Authorization:'MEDCOS#' + userInfo.sessionKey
                     //'Content-Type': 'application/x-www-form-urlencoded'
                 }
             })
             .then(function(res) {
-                console.log(res);
+                //console.log(res);
                 //console.log(res.data.counseling.consumerName)
-                sessionStorage.setItem(message.from,JSON.stringify(infoMessages));
                 window.location.href='#/now/'+ res.data.counseling.id;
             }).then(() => {
                 msgShow('receiver','img',message.url,getShowDate());
-                msgScrollTop()
+                msgScrollTop();
+                sessionStorage.setItem(message.from,JSON.stringify(infoMessages));
             })
             
             console.log('Image download complete!');
@@ -123,7 +126,10 @@ conn.listen({
         console.log('连接失败，请重新登录');
         //alert('请您先登录');
         //localStorage.removeItem('COUNNAME')
-        window.location.replace('#/login');
+        var r = confirm('登录聊天失败，请您先登录');
+        if(r){
+            window.location.replace('#/login');
+        }
     },          //失败回调
     onBlacklistUpdate: function (list) {       //黑名单变动
         // 查询黑名单，将好友拉黑，将好友从黑名单移除都会回调这个函数，list则是黑名单现有的所有好友信息
@@ -164,37 +170,7 @@ var sendPrivateText = function(messages,toUno){
     conn.send(msg.body);
     infoMessages.push(msg.body);
     sessionStorage.setItem(toUno,JSON.stringify(infoMessages));
- }
- //发送图片消息
- /*document.addEventListener('paste', function (e) {
-    if (e.clipboardData && e.clipboardData.types) {
-        if (e.clipboardData.items.length > 0) {
-            if (/^image\/\w+$/.test(e.clipboardData.items[0].type)) {
-                var blob = e.clipboardData.items[0].getAsFile();
-                var url = window.URL.createObjectURL(blob);
-                var id = conn.getUniqueId();             // 生成本地消息id
-                var msg = new WebIM.message('img', id);  // 创建图片消息
-                msg.set({
-                    apiUrl: WebIM.config.apiURL,
-                    file: {data: blob, url: url},
-                    to: 'username',                      // 接收消息对象
-                    roomType: false,
-                    chatType: 'singleChat',
-                    onFileUploadError: function (error) {
-                        console.log('Error');
-                    },
-                    onFileUploadComplete: function (data) {
-                        console.log('Complete');
-                    },
-                    success: function (id) {
-                        console.log('Success');
-                    }
-                });
-                conn.send(msg.body);
-            }
-        }
-    }
-});*/
+ };
 // 发送图片消息
 var sendPrivateImg = function (imgSrc,toUno) {
         var id = conn.getUniqueId();
@@ -236,24 +212,16 @@ var sendPrivateImg = function (imgSrc,toUno) {
             conn.send(msg.body);
         }
 };
-/*var sendPrivateInfo = function (messages,toUno) {
-    var id = conn.getUniqueId();                 // 生成本地消息id
-    var msg = new WebIM.message('cmd', id);      // 创建文本消息
-    msg.set({
-        msg: messages,                  // 消息内容
-        to: toUno,                     // 接收消息对象（用户id）
-        ext: {"msgType":3}, 
-        action:'action',                        
-        roomType: false,
-        success: function (id, serverMsgId) {
-            console.log('send private Info Success');
-            let time = getShowDate()
-            console.log(msg)
-            let content = msg.value;
-            msgShow('sender','info',content,time);
-            msgScrollTop();
-        }
-    });
-    msg.body.chatType = 'singleChat';
-    conn.send(msg.body);
-};*/
+$(function(){
+    userInfo = localStorage.getItem('COUNNAME')
+    if(userInfo){
+        userInfo = JSON.parse(userInfo)
+        var signIn = {
+            apiUrl: WebIM.config.apiURL,
+            user: userInfo.counselor.uno,
+            pwd: userInfo.counselor.easemobPwd,
+            appKey: WebIM.config.appkey
+        };
+        conn.open(signIn);
+    }
+ });

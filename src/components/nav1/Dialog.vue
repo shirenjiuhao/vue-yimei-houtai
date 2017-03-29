@@ -287,15 +287,15 @@
 					let imgSrc = this.imageUrl;
 					//console.log(this.imageUrl)
 					this.editLoading = false;
-					console.log(imgSrc + '已经获取到图片')
+					//console.log(imgSrc + '已经获取到图片')
 	            }
 	            let messages = this.a;
 	            if(messages !== ''){
 	            	this.a='';
 	            	console.log('准备发送文字')
 	            	sendPrivateText(messages,this.toUser.consumerUno);
-	            	this.editLoading = false;
 	            }
+	            this.editLoading = false;
 			},
 			//发送方案
 			sendMessageInfo(){
@@ -406,20 +406,23 @@
 				let jsadsadjsald = sessionStorage.getItem(this.toUser.consumerUno)
 				if(jsadsadjsald){
 					let InfoMsg = this.MoreInfoMessage;
+					//console.log(InfoMsg)
 					for(let i in InfoMsg){
 						//console.log(i)
-						if(InfoMsg[i].to != this.usersUno){
-			                if(InfoMsg[i].type == 'txt'){
-			                	msgShow('sender','text',InfoMsg[i].msg,InfoMsg[i].ext.time);
-			                }else{
-			                	msgShow('sender','img',InfoMsg[i].ext.imgSrc,InfoMsg[i].ext.time);
-			                }
-						}else{
-			                if(InfoMsg[i].type == 'txt'){
-			                	msgShow('receiver','text',InfoMsg[i].msg,InfoMsg[i].ext.time);
-			                }else{
-			                	msgShow('receiver','img',InfoMsg[i].ext.imgSrc,InfoMsg[i].ext.time);
-			                }
+						if(InfoMsg[i].ext.msgType){
+							if(InfoMsg[i].to != this.usersUno){
+				                if(InfoMsg[i].ext.msgType != 2){
+				                	msgShow('sender','text',InfoMsg[i].msg,InfoMsg[i].ext.time);
+				                }else{
+				                	msgShow('sender','img',InfoMsg[i].ext.imgSrc,InfoMsg[i].ext.time);
+				                }
+							}else{
+				                if(InfoMsg[i].ext.msgType != 2){
+				                	msgShow('receiver','text',InfoMsg[i].data,InfoMsg[i].ext.time);
+				                }else{
+				                	msgShow('receiver','img',InfoMsg[i].ext.imgSrc,InfoMsg[i].ext.time);
+				                }
+							}
 						}
 					}
 				}
@@ -457,7 +460,7 @@
 			//加载聊天界面数据
 			handleEdit () {
 				//console.log(this.$route.params);
-				this.progess = JSON.parse(localStorage.getItem(this.toUser.consumerId))
+				this.progess = JSON.parse(sessionStorage.getItem(this.toUser.consumerId))
 				//console.log(this.progess)
 				this.getPrice(this.progess);
 				
@@ -572,7 +575,7 @@
 								//let schemeId = res.data.data.id ;
 								this.progess = res.data.data.items;
 								this.getPrice(this.progess);
-								localStorage.setItem(this.toUser.consumerId, JSON.stringify(this.progess))
+								sessionStorage.setItem(this.toUser.consumerId, JSON.stringify(this.progess))
 								this.getAllProgess();
 							}).catch(err => {
 								this.addLoading = false;
@@ -609,5 +612,9 @@
 .box-card{border: none}
 .progessList{
     height: 412px; overflow-y:scroll;
+}
+.window_right_icon{
+	background: url('../../assets/wode.png') no-repeat;
+	background-size:100%;
 }
 </style>

@@ -66,7 +66,7 @@
                     pwd: res.data.counselor.easemobPwd,
                     appKey: WebIM.config.appkey,
                     success: function (token) {
-                        alert('登陆成功');
+                        //alert('登陆成功');
                         //console.log(token)
                          //var token = token.access_token;
                          //WebIM.utils.setCookie('webim_' + encryptUsername, token, 1);
