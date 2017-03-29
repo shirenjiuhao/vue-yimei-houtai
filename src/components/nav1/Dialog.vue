@@ -13,19 +13,14 @@
 					      :value="item.key">
 					    </option>
 					 </select>
-					 <span class='dialog_use' v-cloak>转接至：{{sysUserName}}</span>
 				</div>
-				<div class="window-chat-time">
-	                    <div>{{nowDate}} 用户进入</div>
-	                    <div>由<span style='color:#58B7FF'>{{sysUserName}}</span>接待</div>
-	                </div>
 			  	<div id='dialog_chat'>
 			  		<!-- <Message></Message> -->   
 	            </div>
 	            <div class='dialog_foot'>
 	            	<el-input style='width:80%;' v-model='a'
 					  type="text" id="info_text" size='large'
-					  placeholder="请输入内容 同时按住Ctrl+Enter发送消息"
+					  placeholder="请输入内容 Enter发送消息" autofocus="autofocus"
 					  @keyup.native='onKeyup'
 					  >
 					</el-input>
@@ -39,24 +34,13 @@
 			<el-col :span="10">
 				<el-tabs v-model="activeName" @tab-click="handleClick">
 				    <el-tab-pane label="用户信息" name="first">
-						<template>
-							<div class="window_right_msg">
-				                <div><i class="window_right_icon"></i>个人信息</div>
-				                <div>姓名：{{toUser.consumerName || '正在加载'}}</div>
-				                <div>手机号：{{toUser.tel || '正在加载'}}</div>
-				                <div>IP地址：{{toUser.address || '正在加载'}}</div>
-				                <div>来源页面：{{toUser.page || '正在加载'}}</div>
-				            </div>
-				            <!-- <div class="window_right_msg">
-				                <div><i class="window_right_icon"></i>历史记录</div>
-				                <el-card class="box-card">
-				            								  <div>
-				            								    v-for="o in lishi"{{'列表内容 ' + o.firsttime }}
-				            								    暂无内容
-				            								  </div>
-				            								</el-card>
-				            </div> -->
-						</template>
+						<div class="window_right_msg">
+			                <div><i class="window_right_icon"></i>个人信息</div>
+			                <div>姓名：{{toUser.consumerName || '正在加载'}}</div>
+			                <div>手机号：{{toUser.tel || '正在加载'}}</div>
+			                <div>IP地址：{{toUser.address || '正在加载'}}</div>
+			                <div>来源页面：{{toUser.page || '正在加载'}}</div>
+			            </div>
 					</el-tab-pane>
 				    <el-tab-pane label="制定方案" name="second">
 						<section id='progess'>
@@ -163,7 +147,7 @@
 				listLoading: false,
 				usersUno:'',//发送者环信ID
 				toUser:[],//接收者信息
-				options:[{name:'当前对话',key:1},{name:'无效对话',key:2}],
+				options:[{name:'当前对话',key:1}],
 				activeName: 'first',//默认选项卡
 				lishi:[{firsttime:'2017-03-17'},{firsttime:'2017-03-17'}],
 				doctors:[],//医生列表
@@ -241,7 +225,7 @@
 			//发送消息
 			onKeyup (e) {//键盘发送
 				let messages = this.a;
-	            if (e.ctrlKey && e.keyCode === 13 && messages.length) {
+	            if (e.keyCode === 13 && messages !='') {
 	            	this.a = '';
 	                if(this.handleAvatarSuccess()){
 	                	let file = $('#image')[0].files[0];
@@ -401,12 +385,10 @@
 			//获取当前聊天记录
 			getDangqianMsg(){
 				this.MoreInfoMessage = JSON.parse(sessionStorage.getItem(this.toUser.consumerUno));
-				//console.log(this.toUser.consumerUno)
-				//console.log(this.MoreInfoMessage)
 				let jsadsadjsald = sessionStorage.getItem(this.toUser.consumerUno)
 				if(jsadsadjsald){
 					let InfoMsg = this.MoreInfoMessage;
-					//console.log(InfoMsg)
+					console.log(InfoMsg)
 					for(let i in InfoMsg){
 						//console.log(i)
 						if(InfoMsg[i].ext.msgType){
@@ -608,10 +590,9 @@
 .myInput{width:218px;}
 #chose{position: absolute;top:10px;right:18px;}
 #image{width:25px;position: absolute;top:0;right:-6px;opacity: 0;}
-#progess{height: 412px; overflow-y:scroll;}
 .box-card{border: none}
 .progessList{
-    height: 412px; overflow-y:scroll;
+    height: 360px; overflow-y:scroll;
 }
 .window_right_icon{
 	background: url('../../assets/wode.png') no-repeat;

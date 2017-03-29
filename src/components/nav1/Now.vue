@@ -102,8 +102,6 @@
 					//this.totalPage = res.data.data.pager.recordCount;
 					this.currentPage = res.data.data.pager.pageNumber;
 					this.pageSize = res.data.data.pager.pageSize;
-					//let list = res.data.data.list;
-					//let list = listUsers(res.data.data.list);
 					this.users = listUsers(res.data.data.list);;
 					this.totalPage = this.users.length
 				}).catch(err => {
