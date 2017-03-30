@@ -5,7 +5,7 @@ module.exports = {
   entry: './src/main.js',
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: '/dist/',
+    publicPath: './dist/',
     filename: 'build.js'
   },
   module: {
@@ -29,8 +29,8 @@ module.exports = {
         loader:'style-loader!css-loader'
       },
       {
-        test: /\.less$/,
-        loader: 'vue-style-loader!css-loader!less-loader'
+        test:/\.less$/,
+        loader:'style-loader!css-loader!less-loader'
       },
       {
         test: /\.(png|jpg|gif|svg|woff|ttf)$/,

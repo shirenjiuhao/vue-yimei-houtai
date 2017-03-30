@@ -10,7 +10,6 @@
 					<span class="el-dropdown-link userinfo-inner">{{sysUserName}}</span>
 					<el-dropdown-menu slot="dropdown">
 						<el-dropdown-item>我的消息</el-dropdown-item>
-						<el-dropdown-item>设置</el-dropdown-item>
 						<el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
 					</el-dropdown-menu>
 				</el-dropdown>
@@ -33,11 +32,11 @@
 				<div class="grid-content bg-purple-light">
 					<el-col :span="24" class="breadcrumb-container">
 						<strong class="title">{{$route.name}}</strong>
-						<el-breadcrumb separator="/" class="breadcrumb-inner">
+						<!-- <el-breadcrumb separator="/" class="breadcrumb-inner">
 							<el-breadcrumb-item v-for="item in $route.matched" :key="item.id">
 								{{ item.name }}
 							</el-breadcrumb-item>
-						</el-breadcrumb>
+						</el-breadcrumb> -->
 					</el-col>
 					<el-col :span="24" class="content-wrapper">
 						<transition>
@@ -57,8 +56,8 @@
 			return {
 				sysUserName: '',
 				sysUserAvatar: '',
-				logoutURL:'api/beta/counselor/logout.aspx',
-				Authorization:`MEDCOS#${this.$router.params.sessionKey}`
+				logoutURL:'/api/beta/counselor/logout.aspx',
+				Authorization:''
 			}
 		},
 		methods: {
@@ -90,8 +89,10 @@
 					}).then(res => {
 						console.log(res)
 						if(res.data.status == 200){
-							sessionStorage.removeItem('user');
+							sessionStorage.clear();
+							localStorage.removeItem('COUNNAME')
 							this.$router.push('/login');
+							conn.close();
 						}
 					})
 				}).catch(() => {
@@ -108,12 +109,18 @@
 				this.sysUserName = user.username || '';
 				//this.sysUserAvatar =  || '';
 			}
+			var userInfo = localStorage.getItem('COUNNAME');
+			if (userInfo) {
+				userInfo = JSON.parse(userInfo);
+				//console.log(userInfo)
+				this.Authorization = `MEDCOS#${userInfo.sessionKey}`;
+			}
 		}
 	}
 
 </script>
 
-<style scoped>
+<style scoped lang='less'>
 	.container {
 		position: absolute;
 		top: 0px;
@@ -125,15 +132,20 @@
 			line-height: 60px;
 			background: #1F2D3D;
 			color: #c0ccda;
-			
+			.mytitle{
+				margin-left: 20px;
+			}
+			.userinfo {
+				text-align: right;
+				padding-right: 35px;
+			}
+			.logo {
+				font-size: 22px;
+				.txt {
+					color: #20a0ff
+				}
+			}
 		}
-	.header .mytitle{
-			margin-left: 20px;
-		}
-	.header .userinfo {
-		text-align: right;
-		padding-right: 35px;
-	}
 	.userinfo-inner {
 			color: #c0ccda;
 			cursor: pointer;
@@ -145,28 +157,21 @@
 				margin: 10px 0px 10px 10px;
 				float: right;
 			}
-	.header .logo {
-		font-size: 22px;
-	}
 	/* .header .logo img {
 			width: 40px;
 			float: left;
 			margin: 10px 10px 10px 18px;
 		} */
-	.header .logo .txt {
-			color: #20a0ff
-		}
 	.main {
 		background: #324057;
 		position: absolute;
 		top: 60px;
 		bottom: 0px;
 		overflow: hidden;
-	}
-	.main aside {
+		aside {
 			width: 180px;
 		}
-	.main .content-container {
+		.content-container {
 			background: #f1f2f7;
 			position: absolute;
 			right: 0px;
@@ -176,19 +181,20 @@
 			overflow-y: scroll;
 			padding: 20px;
 		}
-	.breadcrumb-container {
-			margin-bottom: 15px;	
+	}
+.breadcrumb-container {
+		margin-bottom: 15px;	
+		.title {
+			width: 200px;
+			float: left;
+			color: #475669;
 		}
-		.breadcrumb-container .title {
-				width: 200px;
-				float: left;
-				color: #475669;
-			}
-		.breadcrumb-container .breadcrumb-inner {
-				float: right;
-			}
-		.content-wrapper {
-			background-color: #fff;
-			box-sizing: border-box;
+		.breadcrumb-inner {
+			float: right;
 		}
+	}
+.content-wrapper {
+	background-color: #fff;
+	box-sizing: border-box;
+}
 </style>

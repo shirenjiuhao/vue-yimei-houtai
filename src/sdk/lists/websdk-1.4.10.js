@@ -3374,7 +3374,7 @@
 	    };
 	    this.onConfirmPop(options);
 	};
-	connection.prototype._onReceiveRejectionFromGroup = function (info) {
+	connection.prototype._onReceiveRejectionFromGroup = function () {
 	    info = eval('(' + info + ')');
 	    var options = {
 	        title: "Group notification",

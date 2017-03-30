@@ -1,27 +1,31 @@
-/**
- * Vuex
- * http://vuex.vuejs.org/zh-cn/intro.html
- */
-import Vue from 'vue';
-import Vuex from 'vuex';
 
-Vue.use(Vuex);
-
-const now = new Date();
+/*const now = new Date();
 const store = new Vuex.Store({
     state: {
         // 当前用户
         user: {
-            name: 'coffce',
-            img: 'dist/images/1.jpg'
+            name: 'hahhaa',
+            img: ''
         },
+        userList: [
+            {
+                id: 2,
+                name: '站长素材',
+                img: 'dist/images/2.png'
+            },
+            {
+                id: 3,
+                name: 'webpack',
+                img: 'dist/images/3.jpg'
+            }
+        ],
         // 会话列表
         sessions: [
             {
                 id: 1,
                 user: {
                     name: '示例介绍',
-                    img: 'dist/images/2.png'
+                    img: ''
                 },
                 messages: [
                     {
@@ -37,7 +41,7 @@ const store = new Vuex.Store({
                 id: 2,
                 user: {
                     name: 'webpack',
-                    img: 'dist/images/3.jpg'
+                    img: ''
                 },
                 messages: []
             }
@@ -49,7 +53,7 @@ const store = new Vuex.Store({
     },
     mutations: {
         INIT_DATA (state) {
-            let data = localStorage.getItem('vue-chat-session');
+            let data = sessionStorage.getItem('user');
             if (data) {
                 state.sessions = JSON.parse(data);
             }
@@ -78,7 +82,7 @@ store.watch(
     (state) => state.sessions,
     (val) => {
         console.log('CHANGE: ', val);
-        localStorage.setItem('vue-chat-session', JSON.stringify(val));
+        localStorage.setItem('user', JSON.stringify(val));
     },
     {
         deep: true
@@ -91,4 +95,4 @@ export const actions = {
     sendMessage: ({ dispatch }, content) => dispatch('SEND_MESSAGE', content),
     selectSession: ({ dispatch }, id) => dispatch('SELECT_SESSION', id),
     search: ({ dispatch }, value) => dispatch('SET_FILTER_KEY', value)
-};
+};*/

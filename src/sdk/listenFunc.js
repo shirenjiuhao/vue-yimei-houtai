@@ -1,14 +1,14 @@
 /**
  * Created by Administrator on 2017/2/27.
  */
-
+ var userInfo = '';
+const infoMessages = [];
 const conn = new WebIM.connection({
     https: WebIM.config.https,
     url: WebIM.config.xmppURL,
     isAutoLogin: WebIM.config.isAutoLogin,
     isMultiLoginSessions: WebIM.config.isMultiLoginSessions
 });
-
 conn.listen({
     onOpened: function ( message ) {          //连接成功回调
         // 如果isAutoLogin设置为false，那么必须手动设置上线，否则无法收消息
@@ -20,16 +20,33 @@ conn.listen({
         console.log('已退出登录')
     },         //连接关闭回调
     onTextMessage: function ( message ) {
-    	this.editFormVisible = true;
         console.log(message);
-        var from = message.from;//消息的发送者
-        var mestype = message.type;//消息发送的类型是群组消息还是个人消息
-        var messageContent = message.data;
-        $('.dialog_chat').append('<div v-html class="window-chat-txt">'+
-	    '<img src="/src/assets/logo.png" alt="正在加载"/>'+
-	    '<div  class="window-chat-txt-left">' +
-	    messageContent +'</div>'+
-	'</div>');
+        message.ext.time = getShowDate();
+        // var msg = message;
+        infoMessages.push(message)
+        userInfo = JSON.parse(localStorage.getItem('COUNNAME'))
+        //console.log(userInfo)
+        $.ajax({
+            url: '/api/beta/counseling/infoByUno.aspx?formUno='+ message.from,
+            type: 'get',
+            data: '',
+            headers:{
+                Authorization:'MEDCOS#' + userInfo.sessionKey
+                //'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(function(res) {
+            //console.log(res);
+            //console.log(res.data.counseling.consumerName)
+            window.location.href='#/now/'+ res.data.counseling.id;
+        }).then(() => {
+            msgShow('receiver','text',message.data,getShowDate());
+            msgScrollTop();
+            sessionStorage.setItem(message.from,JSON.stringify(infoMessages))
+        })
+        .catch(function(err) {
+            console.log(err);
+        })
     },    //收到文本消息
     onEmojiMessage: function ( message ) {
         console.log('Emoji');
@@ -40,10 +57,33 @@ conn.listen({
     },   //收到表情消息
     onPictureMessage: function ( message ) {
         console.log('Picture');
-
+        console.log(message)
+        userInfo = JSON.parse(localStorage.getItem('COUNNAME'))
         var options = {url: message.url};
         options.onFileDownloadComplete = function () {
             // 图片下载成功
+            message.ext.time = getShowDate();
+            message.ext.imgSrc = message.url;
+            infoMessages.push(message);
+            $.ajax({
+                url: '/api/beta/counseling/infoByUno.aspx?formUno='+ message.from,
+                type: 'get',
+                data: '',
+                headers:{
+                    Authorization:'MEDCOS#' + userInfo.sessionKey
+                    //'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(function(res) {
+                //console.log(res);
+                //console.log(res.data.counseling.consumerName)
+                window.location.href='#/now/'+ res.data.counseling.id;
+            }).then(() => {
+                msgShow('receiver','img',message.url,getShowDate());
+                msgScrollTop();
+                sessionStorage.setItem(message.from,JSON.stringify(infoMessages));
+            })
+            
             console.log('Image download complete!');
         };
         options.onFileDownloadError = function () {
@@ -83,7 +123,12 @@ conn.listen({
     onError: function ( message ) {
         console.log(message);
         console.log('连接失败，请重新登录');
-        alert('请您先登录');
+        //alert('请您先登录');
+        //localStorage.removeItem('COUNNAME')
+        var r = confirm('登录聊天失败，请您先登录');
+        if(r){
+            window.location.replace('#/login');
+        }
     },          //失败回调
     onBlacklistUpdate: function (list) {       //黑名单变动
         // 查询黑名单，将好友拉黑，将好友从黑名单移除都会回调这个函数，list则是黑名单现有的所有好友信息
@@ -98,4 +143,85 @@ WebIM.utils.isCanDownLoadFile ;
 WebIM.utils.hasSetRequestHeader;
 //是否设置mimetype
 WebIM.utils.hasOverrideMimeType;
+
+//滚动定位
+var msgScrollTop = function(){
+    $(msgInit.el)[0].scrollTop = $(msgInit.el)[0].scrollHeight + $(msgInit.el)[0].offsetHeight;
+}
+//发送文本消息
+var sendPrivateText = function(messages,toUno){
+    let id = conn.getUniqueId();                 // 生成本地消息id
+    let msg = new WebIM.message('txt', id);      // 创建文本消息
+    msg.set({
+        msg: messages,                  // 消息内容
+        to: toUno,    // 接收消息对象（用户id）
+        ext: {"msgType":1,time:getShowDate()},
+        roomType: false,
+        success: function (id, serverMsgId) {
+            console.log('send private text Success');
+            console.log(msg)
+            let content = msg.value;
+            msgShow('sender','text',content,getShowDate());
+            msgScrollTop();
+        }
+    });
+    msg.body.chatType = 'singleChat';
+    conn.send(msg.body);
+    infoMessages.push(msg.body);
+    sessionStorage.setItem(toUno,JSON.stringify(infoMessages));
+ };
+// 发送图片消息
+var sendPrivateImg = function (imgSrc,toUno) {
+        var id = conn.getUniqueId();
+        var msg = new WebIM.message('img', id);
+        var input = document.getElementById('image');            // 选择图片的input
+        var file = WebIM.utils.getFileUrl(input);                   // 将图片转化为二进制文件
+        var allowType = {
+            'jpg': true,
+            'gif': true,
+            'png': true,
+            'bmp': true
+        };
+        if (file.filetype.toLowerCase() in allowType) {
+            console.log('send');
+            //console.log(file);
+            var option = {
+                apiUrl: WebIM.config.apiURL,
+                file: file,
+                to: toUno ,
+                ext: {"msgType":2,time:getShowDate(),imgSrc: imgSrc},
+                roomType: false,
+                chatType: 'singleChat',
+                onFileUploadError: function () {
+                    console.log('onFileUploadError');
+                },
+                onFileUploadComplete: function () {
+                    console.log('onFileUploadComplete'+' 发送成功');
+                },
+                success: function () {
+                    console.log('Success');
+                    msgShow('sender','img',imgSrc,getShowDate());
+                    msgScrollTop();
+                },
+                // flashUpload: WebIM.flashUpload               // 意义待查
+            };
+            infoMessages.push(option);
+            sessionStorage.setItem(toUno,JSON.stringify(infoMessages));
+            msg.set(option);
+            conn.send(msg.body);
+        }
+};
+$(function(){
+    userInfo = localStorage.getItem('COUNNAME')
+    if(userInfo){
+        userInfo = JSON.parse(userInfo)
+        var signIn = {
+            apiUrl: WebIM.config.apiURL,
+            user: userInfo.counselor.uno,
+            pwd: userInfo.counselor.easemobPwd,
+            appKey: WebIM.config.appkey
+        };
+        conn.open(signIn);
+    }
+ });
 
