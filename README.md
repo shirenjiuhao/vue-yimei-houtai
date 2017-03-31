@@ -2,13 +2,15 @@
 
 > A Vue.js project
 
+server at internet need open nginx proxy http://sandbox.yifengbeauty.com/api
+
 ## Build Setup
 
 ``` bash
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8080
+# serve with hot reload at localhost:5000
 npm run dev
 
 # build for production with minification
