@@ -3,8 +3,8 @@
  */
 var msgInit = {
     el: '#dialog_chat', //消息容器
-    senderAvatar: '/src/assets/1.jpg',  //发送者头像
-    receiverAvatar: '/src/assets/3.jpg', //接收者头像
+    senderAvatar: './src/assets/1.jpg',  //发送者头像
+    receiverAvatar: './src/assets/3.jpg', //接收者头像
 }
 
 
