@@ -18,7 +18,7 @@ WebIM.config = {
     /*
      * Application AppKey
      */
-    appkey: '1195170121178218#ymzs',
+    appkey: '1173170306178656#medcos',
     /*
      * Whether to use wss  '1173170306178656#美询'
         测试服 1195170121178218#ymzs
