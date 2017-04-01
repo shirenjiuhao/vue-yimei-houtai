@@ -3,7 +3,7 @@
  */
 var msgInit = {
     el: '#dialog_chat', //消息容器
-    senderAvatar: './src/assets/1.jpg',  //发送者头像
+    senderAvatar: 'http://k1.jsqq.net/uploads/allimg/1612/140F5A32-6.jpg',  //发送者头像
     receiverAvatar: './src/assets/3.jpg', //接收者头像
 }
 
@@ -99,7 +99,7 @@ var getShowDate = function(){
     let hour = date.getHours() <10 ? '0'+ date.getHours() : date.getHours();
     let minutes = date.getMinutes() < 10 ? '0'+ date.getMinutes() : date.getMinutes();
     let seconds = date.getSeconds() < 10 ? '0'+ date.getSeconds() : date.getSeconds()
-    return string = date.getFullYear()+'-'+ month +'-'+ day +' '+ hour + ':' + minutes + ':' + seconds ;
+    return string = month +'-'+ day +' '+ hour + ':' + minutes + ':' + seconds ;
 }
 //只是单个属性值比较的对象去重
 var listUsers = function(item){

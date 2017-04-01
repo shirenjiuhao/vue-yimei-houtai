@@ -370,7 +370,7 @@
 							msgShow('sender','img',msg[i].msg,msg[i].ctime);
 						}
 						if(msg[i].msgtype == 3 && msg[i].msg){
-							msgShow('sender','info','已推送订单',msg[i].ctime);
+							// msgShow('sender','info','已推送订单',msg[i].ctime);
 						}
 					}else{
 		                if(msg[i].msgtype == 1 && msg[i].msg){
@@ -393,10 +393,13 @@
 						//console.log(i)
 						if(InfoMsg[i].ext.msgType){
 							if(InfoMsg[i].to != this.usersUno){
-				                if(InfoMsg[i].ext.msgType != 2){
+				                if(InfoMsg[i].ext.msgType == 1){
 				                	msgShow('sender','text',InfoMsg[i].msg,InfoMsg[i].ext.time);
-				                }else{
+				                }
+				                if(InfoMsg[i].ext.msgType == 2){
 				                	msgShow('sender','img',InfoMsg[i].ext.imgSrc,InfoMsg[i].ext.time);
+				                }
+				                if(InfoMsg[i].ext.msgType == 3){
 				                }
 							}else{
 				                if(InfoMsg[i].ext.msgType != 2){

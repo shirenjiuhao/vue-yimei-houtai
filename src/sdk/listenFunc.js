@@ -23,6 +23,7 @@ conn.listen({
         console.log(message);
         message.ext.time = getShowDate();
         // var msg = message;
+        infoMessages = JSON.parse(sessionStorage.getItem(message.from)) || [];
         infoMessages.push(message)
         userInfo = JSON.parse(localStorage.getItem('COUNNAME'))
         //console.log(userInfo)
@@ -58,6 +59,7 @@ conn.listen({
     onPictureMessage: function ( message ) {
         console.log('Picture');
         console.log(message)
+        infoMessages = JSON.parse(sessionStorage.getItem(message.from)) || [];
         userInfo = JSON.parse(localStorage.getItem('COUNNAME'))
         var options = {url: message.url};
         options.onFileDownloadComplete = function () {
@@ -167,6 +169,7 @@ var sendPrivateText = function(messages,toUno){
     });
     msg.body.chatType = 'singleChat';
     conn.send(msg.body);
+    infoMessages = JSON.parse(sessionStorage.getItem(message.from)) || [];
     infoMessages.push(msg.body);
     sessionStorage.setItem(toUno,JSON.stringify(infoMessages));
  };
@@ -182,6 +185,7 @@ var sendPrivateImg = function (imgSrc,toUno) {
             'png': true,
             'bmp': true
         };
+        infoMessages = JSON.parse(sessionStorage.getItem(message.from)) || [];
         if (file.filetype.toLowerCase() in allowType) {
             console.log('send');
             //console.log(file);
