@@ -44,7 +44,7 @@
 					</el-tab-pane>
 				    <el-tab-pane label="制定方案" name="second">
 						<section id='progess'>
-							<el-card id='progessInfo' class="box-card" v-for="o in progess" :key='o.id'>
+							<el-card id='progessInfo' class="box-card" v-for="o in progess.items" :key='o.id'>
 							    <div>项目名称：{{o.name}}</div>
 							    <div>使用部位：{{o.body}}</div>
 							    <div>治疗时长：{{o.curetime}}</div>
@@ -53,6 +53,7 @@
 							    <div>项目优势：{{o.advantage}}</div>
 							    <div>项目金额：￥{{o.amount}}</div>
 							    <div>优惠金额：￥{{o.discount}}</div>
+							    <div>预约时间：{{progess.reserveTime}}</div>
 							</el-card>
 				            <div class="window_right_msg1">
 				                <el-button size="large" icon='plus' @click.native='addProgess'>添加方案</el-button>
@@ -68,7 +69,7 @@
 					<el-tab-pane label="方案列表" name="third">
 						<section class='progessList'>
 							<el-card class='box-card' v-for="item in AllProgess" :key='item.id'>
-							<div v-for='o in item.items' style='border-bottom:1px solid #d1dbe5'>
+							<div v-for='o in item.items'>
 								<div>项目名称：{{o.name}}</div>
 							    <div>使用部位：{{o.body}}</div>
 							    <div>治疗时长：{{o.curetime}}</div>
@@ -77,6 +78,7 @@
 							    <div>项目优势：{{o.advantage}}</div>
 							    <div>项目金额：￥{{o.amount}}</div>
 							    <div>优惠金额：￥{{o.discount}}</div>
+							    <div>预约时间：{{item.reserveTime}}</div>
 							</div>
 							</el-card>
 						</section>
@@ -117,8 +119,13 @@
 			    <el-form-item label="项目金额" label-width="100px" prop='amount'>
 			      <el-input v-model='addForm.amount' type='number' placeholder="请输入项目金额" class='myInput' auto-complete="off"></el-input>
 			    </el-form-item>
-			    <el-form-item label="优惠金额" label-width="100px" prop='discount'>
-			      <el-input v-model='addForm.discount' type='number' placeholder="请输入优惠金额" class='myInput' auto-complete="off"></el-input>
+			    <el-form-item label="预约时间" label-width="100px" prop='reserveTime'>
+			      <!-- <el-input v-model='addForm.reserveTime' placeholder="请输入预约时间 例2017-03-15 12:30" class='myInput' auto-complete="off"></el-input> -->
+			        <el-date-picker
+				      v-model="addForm.reserveTime"
+				      type="datetime"
+				      placeholder="请选择预约时间">
+				    </el-date-picker>
 			    </el-form-item>
 		    </el-form>
 		    <div slot="footer" class="dialog-footer">
@@ -130,6 +137,7 @@
 </template>
 <script>
 	import axios from 'axios'
+	import util from '../../api/util'
 	import '../../css/now.css'
 	export default {
 		data() {
@@ -141,7 +149,7 @@
 				//users: [],
 				a:'',//发送消息的model
 				imageUrl: '',//发送图片的Url
-				nowDate: getShowDate(),//获取当前时间
+				nowDate: '',//获取当前时间
 				userInfo:'',//当前用户信息
 				Authorization:'',//设置请求头
 				listLoading: false,
@@ -192,8 +200,8 @@
 					amount:[
 						{ required: true, message: '请输入项目金额', trigger: 'blur' }
 					],
-					discount:[
-						{ required: true, message: '请输入优惠金额', trigger: 'blur' }
+					reserveTime:[
+						{ required: true, message: '请输入预约时间', trigger: 'blur' ,type:'object'}
 					],
 				},
 				//新增界面数据
@@ -208,7 +216,8 @@
 					effect:'',//治疗效果
 					advantage:'',//项目优势
 					amount:'',//项目金额
-					discount:'',//优惠金额
+					discount:0,//优惠金额
+					reserveTime:'',
 				}
 			}
 		},
@@ -289,7 +298,7 @@
 				if(this.progess){
 					//sendPrivateInfo(this.progess,this.toUser.consumerUno);
 					let para = {
-						schemeId: this.progess[0].schemeId
+						schemeId: this.progess.id
 					}
 					axios({
 						url:'/api/beta/scheme/counselor/push.aspx',
@@ -445,10 +454,6 @@
 			//加载聊天界面数据
 			handleEdit () {
 				//console.log(this.$route.params);
-				this.progess = JSON.parse(sessionStorage.getItem(this.toUser.consumerId))
-				//console.log(this.progess)
-				this.getPrice(this.progess);
-				
 				let id = this.$route.params.id;
 				//console.log(id)
 				axios({
@@ -470,8 +475,11 @@
 				}).then(res => {
 					console.log(res)
 					this.toUser = res.data.data.counseling;
-					this.getPrice(this.progess);
+					//this.getPrice(this.progess);
 					this.infoMessage();
+					this.progess = JSON.parse(sessionStorage.getItem(this.toUser.consumerId)) || []
+					console.log(this.progess)
+					this.getPrice(this.progess);
 				})
 			},
 			//获取方案列表
@@ -505,9 +513,9 @@
 			//获取总价
 			getPrice(e){
 				let oop = 0;
-				for(let i in e){
+				for(let i in e.items){
 					//console.log(i)
-					oop += (e[i].amount - e[i].discount)
+					oop += (e.items[i].amount - e.items[i].discount)
 					//console.log(oop)
 				}
 				this.orderPrice = oop;
@@ -519,15 +527,17 @@
 						this.$confirm('确认提交吗？', '提示', {}).then(() => {
 							this.addLoading = true;
 							let para = Object.assign({}, this.addForm);
+							para.reserveTime = (!para.reserveTime || para.reserveTime == '') ? '' : util.formatDate.format(new Date(para.reserveTime), 'yyyy-MM-dd hh:mm:ss');
+							//console.log(para.reserveTime)
 							let params = {
 								counselorId: this.userInfo.counselor.id,
 								hospitalId: this.toUser.hospitalId,
 								consumerId: this.toUser.consumerId,
-								reserveTime: this.nowDate,
-								doctorId: this.addForm.doctorId,
+								reserveTime: para.reserveTime,
+								doctorId: para.doctorId,
 								items:[para]
 							};
-							//console.log(para)
+							//console.log(params)
 							params = JSON.stringify(params)
 							axios({
 								url:'/api/beta/scheme/counselor/createByJson.aspx',
@@ -558,7 +568,7 @@
 								this.$refs['addForm'].resetFields();
 								this.addFormVisible = false;
 								//let schemeId = res.data.data.id ;
-								this.progess = res.data.data.items;
+								this.progess = res.data.data;
 								this.getPrice(this.progess);
 								sessionStorage.setItem(this.toUser.consumerId, JSON.stringify(this.progess))
 								this.getAllProgess();

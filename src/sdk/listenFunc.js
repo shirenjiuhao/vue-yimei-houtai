@@ -1,8 +1,8 @@
 /**
  * Created by Administrator on 2017/2/27.
  */
- var userInfo = '';
-const infoMessages = [];
+var userInfo = '';
+var infoMessages = [];
 const conn = new WebIM.connection({
     https: WebIM.config.https,
     url: WebIM.config.xmppURL,
@@ -40,6 +40,12 @@ conn.listen({
             //console.log(res);
             //console.log(res.data.counseling.consumerName)
             window.location.href='#/now/'+ res.data.counseling.id;
+            /*if(window.location.href !='#/now/'+ res.data.counseling.id){
+                window.open('#/now/'+ res.data.counseling.id)
+            }else{
+
+            }*/
+            
         }).then(() => {
             msgShow('receiver','text',message.data,getShowDate());
             msgScrollTop();
@@ -169,7 +175,7 @@ var sendPrivateText = function(messages,toUno){
     });
     msg.body.chatType = 'singleChat';
     conn.send(msg.body);
-    infoMessages = JSON.parse(sessionStorage.getItem(message.from)) || [];
+    infoMessages = JSON.parse(sessionStorage.getItem(toUno)) || [];
     infoMessages.push(msg.body);
     sessionStorage.setItem(toUno,JSON.stringify(infoMessages));
  };
@@ -185,7 +191,7 @@ var sendPrivateImg = function (imgSrc,toUno) {
             'png': true,
             'bmp': true
         };
-        infoMessages = JSON.parse(sessionStorage.getItem(message.from)) || [];
+        infoMessages = JSON.parse(sessionStorage.getItem(toUno)) || [];
         if (file.filetype.toLowerCase() in allowType) {
             console.log('send');
             //console.log(file);
