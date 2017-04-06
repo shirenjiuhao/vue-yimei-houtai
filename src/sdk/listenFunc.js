@@ -1,8 +1,8 @@
 /**
  * Created by Administrator on 2017/2/27.
  */
-var userInfo = '';
-var infoMessages = [];
+ var userInfo = '';
+ var infoMessages = [];
 const conn = new WebIM.connection({
     https: WebIM.config.https,
     url: WebIM.config.xmppURL,
@@ -37,7 +37,7 @@ conn.listen({
             }
         })
         .then(function(res) {
-            //console.log(res);
+            console.log(res);
             //console.log(res.data.counseling.consumerName)
             window.location.href='#/now/'+ res.data.counseling.id;
             /*if(window.location.href !='#/now/'+ res.data.counseling.id){
@@ -159,7 +159,8 @@ var msgScrollTop = function(){
 //发送文本消息
 var sendPrivateText = function(messages,toUno){
     let id = conn.getUniqueId();                 // 生成本地消息id
-    let msg = new WebIM.message('txt', id);      // 创建文本消息
+    let msg = new WebIM.message('txt', id); 
+    console.log(toUno)     // 创建文本消息
     msg.set({
         msg: messages,                  // 消息内容
         to: toUno,    // 接收消息对象（用户id）
