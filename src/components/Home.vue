@@ -91,14 +91,15 @@
 						if(res.data.status == 200){
 							sessionStorage.clear();
 							localStorage.removeItem('COUNNAME')
-							this.$router.push('/login');
+							
 							conn.close();
 						}
+						else localStorage.removeItem('COUNNAME');
+						this.$router.push('/login');
 					})
 				}).catch(() => {
 
 				});
-
 
 			}
 		},

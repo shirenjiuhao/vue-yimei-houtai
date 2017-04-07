@@ -15,25 +15,25 @@
 		</el-col>
 		<!--列表-->
 		<el-table :data="users" highlight-current-row v-loading="listLoading" style="width: 100%;">
-				<el-table-column prop="firsttime" label="会话开始时间" width="150" sortable>
+				<el-table-column prop="firsttime" label="会话开始时间" width="120">
 				</el-table-column>
-				<el-table-column prop="consumername" label="用户名" width="130" sortable>
+				<el-table-column prop="consumername" label="用户名" width="130">
 				</el-table-column>
-				<el-table-column prop="tel" label="手机号" width="130" sortable>
+				<el-table-column prop="tel" label="手机号" width="130">
 				</el-table-column>
-				<el-table-column prop="devicetype" label="来源终端" width="115" sortable>
+				<el-table-column prop="devicetype" label="来源终端" width="115" :formatter="checkDevice">
 				</el-table-column>
-				<el-table-column prop="address" label="用户IP地址" width="130" sortable>
+				<el-table-column prop="address" label="用户IP地址" width="130">
 				</el-table-column>
-				<el-table-column prop="page" label="来源页面" min-width="100" sortable></el-table-column>
-				<el-table-column prop="status" label="状态" min-width="80" sortable>
+				<el-table-column prop="page" label="来源页面" width="100"></el-table-column>
+				<el-table-column prop="lasttime" label="最后会话时间" min-width="80">
 				</el-table-column>
 			<el-table-column label="操作" width="90">
 				<template scope="scope">
 					<!-- <el-badge :value="3" :max="99" class="item">
 					  <el-button size="small" @click="handleEdit(scope.$index, scope.row)">回复</el-button>
 					</el-badge> -->
-					<el-button size="small" @click="handleEdit(scope.$index, scope.row)">进入</el-button>
+					<el-button size="small" @click="handleEdit(scope.$index, scope.row)">会话</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -71,6 +71,10 @@
 			}
 		},
 		methods: {
+			//分辨来源设备
+			checkDevice(row, column){
+				return row.devicetype === 2 ? 'andriod' :'ios'
+			},
 			//分页展示
 			handleCurrentChange(val) {
 				this.currentPage = val;
@@ -101,7 +105,7 @@
 					//this.totalPage = res.data.data.pager.recordCount;
 					this.currentPage = res.data.data.pager.pageNumber;
 					this.pageSize = res.data.data.pager.pageSize;
-					this.users = listUsers(res.data.data.list);;
+					this.users = res.data.data.list;
 					this.totalPage = this.users.length
 				}).catch(err => {
 					this.listLoading = false;

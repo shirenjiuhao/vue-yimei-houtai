@@ -1,4 +1,11 @@
-
+/*import Vuex from 'vuex'
+const store = new Vuex.Store({
+    state: {NewInfoAlert: NewInfoAlert}
+})
+store.watch(
+    (state) => state.NewInfoAlert
+);
+export default store;*/
 /*const now = new Date();
 const store = new Vuex.Store({
     state: {

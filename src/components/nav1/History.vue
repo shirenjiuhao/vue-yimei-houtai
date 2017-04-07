@@ -18,18 +18,18 @@
 		</el-col>
 		<!--列表-->
 		<el-table :data="users" highlight-current-row v-loading="listLoading" style="width: 100%;">
-				<el-table-column prop="firsttime" label="会话开始时间" width="150" sortable>
+				<el-table-column prop="firsttime" label="会话开始时间" width="150" >
 				</el-table-column>
-				<el-table-column prop="consumername" label="用户名" width="130" sortable>
+				<el-table-column prop="consumername" label="用户名" width="130" >
 				</el-table-column>
-				<el-table-column prop="tel" label="手机号" width="130" sortable>
+				<el-table-column prop="tel" label="手机号" width="130">
 				</el-table-column>
-				<el-table-column prop="address" label="用户IP地址" width="130" sortable>
+				<el-table-column prop="address" label="用户IP地址" width="130" >
 				</el-table-column>
-				<el-table-column prop="devicetype" label="服务医生" min-width="100" sortable>
+				<el-table-column prop="conselorname" label="服务医生" width="100" >
 				</el-table-column>
-				<el-table-column prop="page" label="来源页面" min-width="100" sortable></el-table-column>
-				<el-table-column prop="status" label="状态" min-width="80" sortable>
+				<el-table-column prop="page" label="来源页面" width="100" ></el-table-column>
+				<el-table-column prop="lasttime" label="最后会话时间" min-width="80" >
 				</el-table-column>
 			<el-table-column label="操作" width="90">
 				<template scope="scope">
@@ -60,7 +60,7 @@
 				totalPage:0,
 				currentPage: 1,
 				pageSize: 10,
-				listURL:'api/beta/counseling/list.aspx?status=1',
+				listURL:'api/beta/counseling/list.aspx?status=2',
 				Authorization:'',
 				listLoading: false,
 			}

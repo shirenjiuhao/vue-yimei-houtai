@@ -74,7 +74,7 @@
 				listLoading: false,
 				usersUno:'',//发送者环信ID
 				toUser:[],//接收者信息
-				options:[{name:'无效对话',key:1}],
+				options:[{name:'已结束',key:1}],
 				activeName: 'first',//默认选项卡
 				lishi:[{firsttime:'2017-03-17'},{firsttime:'2017-03-17'}],
 				chatInfo:[],//聊天记录
